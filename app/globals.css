@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+:root {
+  --color-page: #f8fafc;
+  --color-surface: #ffffff;
+  --color-ink: #031a3b;
+  --color-ink-soft: #243953;
+  --color-brand: #06b866;
+  --color-brand-hover: #009f58;
+  --color-brand-soft: #e8f8ef;
+  --color-border: rgba(30, 57, 84, 0.14);
+  --color-text-muted: #3f5268;
+  --color-shadow: rgba(18, 45, 72, 0.1);
+
+  --text-hero: clamp(2.8rem, 4.8vw, 4.4rem);
+  --text-h2: clamp(2.1rem, 4vw, 4rem);
+  --text-h3: clamp(1.3rem, 2vw, 2rem);
+  --text-body-lg: clamp(1rem, 1.28vw, 1.18rem);
+  --text-body: clamp(0.94rem, 1vw, 1.05rem);
+  --text-small: clamp(0.76rem, 0.82vw, 0.88rem);
+  --text-nav: clamp(0.84rem, 0.88vw, 0.94rem);
+  --text-button: clamp(0.9rem, 0.96vw, 1rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: "Manrope Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--text-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--color-brand);
+  color: white;
+}
+
+.hero-shell {
+  background-color: var(--color-page);
+}
+
+.navbar-shell,
+.mobile-menu {
+  border: 1px solid var(--color-border);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 18px 50px var(--color-shadow),
+    inset 0 1px rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(22px) saturate(1.15);
+  -webkit-backdrop-filter: blur(22px) saturate(1.15);
+}
+
+.mobile-menu {
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
+.hero-kicker {
+  font-size: clamp(0.64rem, 0.85vw, 0.82rem);
+}
+
+.market-status {
+  border: 1px solid var(--color-border);
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 42px var(--color-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+@media (max-width: 639px) {
+  .navbar-shell {
+    min-height: 4.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

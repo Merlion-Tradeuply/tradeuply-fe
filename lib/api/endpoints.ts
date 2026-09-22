@@ -1,0 +1,26 @@
+export const API_ENDPOINTS = {
+  backend: {
+    clientLogin: "/client/login",
+    clientLogout: "/client/logout",
+    clientMe: "/client/me",
+    clientBalance: "/client/balance",
+    clientDeposits: "/client/deposits",
+    clientPaymentMethods: "/client/payment-methods",
+    clientRegistration: "/client/signup",
+    clientTokenRefresh: "/client/token/refresh",
+    resendOtp: "/client/otp/resend",
+    verifyOtp: "/client/otp/verify",
+  },
+  client: {
+    clientLogin: "/api/client/login",
+    clientLogout: "/api/client/logout",
+    clientRegistration: "/api/client/signup",
+    clientSession: "/api/client/session",
+    clientBalance: "/api/client/balance",
+    clientDeposits: "/api/client/deposits",
+    clientPaymentMethods: "/api/client/payment-methods",
+    clientTokenRefresh: "/api/client/token/refresh",
+    resendOtp: "/api/client/otp/resend",
+    verifyOtp: "/api/client/otp/verify",
+  },
+} as const;
