@@ -10,60 +10,18 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Container } from "@/components/ui/container";
-import { formatUsd, investmentPlanTerms } from "@/data/investment-plans";
+import { formatUsd, type InvestmentPlan } from "@/data/investment-plans";
 
-const investmentPlanDetails = [
-  {
-    allocation: "Cash reserves · Short-term bonds",
-    description: "A measured starting point focused on stability and lower volatility.",
-    features: ["Diversified defensive assets", "Quarterly portfolio review", "Simple performance reporting"],
-    id: "essential",
-    icon: ShieldCheck,
-  },
-  {
-    allocation: "Government bonds · Dividend assets",
-    description: "Designed for investors seeking a steadier approach with an income focus.",
-    features: ["Income-oriented allocation", "Risk-aware diversification", "Quarterly portfolio review"],
-    id: "income",
-    icon: Coins,
-  },
-  {
-    allocation: "Global equities · Bonds · Cash",
-    badge: "Most popular",
-    description: "A diversified mix created to balance long-term growth and portfolio stability.",
-    features: ["Multi-asset diversification", "Monthly portfolio review", "Automatic rebalancing"],
-    id: "balanced",
-    icon: ChartDonut,
-  },
-  {
-    allocation: "International equities · Market themes",
-    description: "Broader exposure to established companies and growing sectors worldwide.",
-    features: ["Global market allocation", "Growth-focused strategy", "Monthly portfolio review"],
-    id: "global-growth",
-    icon: Globe,
-  },
-  {
-    allocation: "Technology · Innovation · Digital assets",
-    description: "A higher-volatility strategy focused on innovation-led markets and emerging themes.",
-    features: ["Innovation-led exposure", "Defined allocation limits", "Active risk monitoring"],
-    id: "future-focus",
-    icon: Sparkle,
-  },
-  {
-    allocation: "Personalized multi-asset portfolio",
-    description: "A tailored investment approach for larger portfolios with individualized allocation and review.",
-    features: ["Personalized asset mix", "Dedicated portfolio reviews", "Priority client support"],
-    id: "wealth-select",
-    icon: Leaf,
-  },
-] as const;
+const planIcons = {
+  chart: ChartDonut,
+  coins: Coins,
+  globe: Globe,
+  leaf: Leaf,
+  shield: ShieldCheck,
+  sparkle: Sparkle,
+};
 
-const investmentPlans = investmentPlanDetails.map((details) => ({
-  ...details,
-  ...investmentPlanTerms.find((terms) => terms.id === details.id)!,
-}));
-
-export function InvestmentPlans() {
+export function InvestmentPlans({ plans }: { plans: InvestmentPlan[] }) {
   return (
     <section
       aria-labelledby="plans-title"
@@ -82,16 +40,16 @@ export function InvestmentPlans() {
             A clearer plan for every investment goal.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-[length:var(--text-body-lg)] leading-[1.75] font-medium text-[var(--color-text-muted)]">
-            Compare six diversified strategies by minimum investment, time horizon,
+            Compare diversified strategies by minimum investment, time horizon,
             risk level, and objective—so you can understand the differences before
             making a decision.
           </p>
         </header>
 
         <div className="mt-14 grid gap-5 md:grid-cols-2 lg:mt-16 lg:grid-cols-3">
-          {investmentPlans.map((plan) => {
-            const Icon = plan.icon;
-            const isFeatured = "badge" in plan;
+          {plans.map((plan) => {
+            const Icon = planIcons[plan.icon];
+            const isFeatured = plan.isFeatured;
 
             return (
               <article
@@ -103,7 +61,7 @@ export function InvestmentPlans() {
               >
                 {isFeatured && (
                   <span className="absolute top-0 right-7 rounded-b-xl bg-[var(--color-brand)] px-4 py-2 text-[0.67rem] font-extrabold tracking-[0.12em] text-white uppercase">
-                    {plan.badge}
+                    {plan.badge || "Featured"}
                   </span>
                 )}
 
@@ -118,7 +76,7 @@ export function InvestmentPlans() {
                   </span>
                   <div>
                     <p className={`text-xs font-bold ${isFeatured ? "text-white/55" : "text-[var(--color-text-muted)]"}`}>
-                      Starting from {formatUsd(plan.minimum)}
+                      Starting from {formatUsd(plan.minimumInvestment)}
                     </p>
                     <h3 className="mt-1 text-xl font-extrabold tracking-[-0.03em]">{plan.name}</h3>
                   </div>
@@ -134,7 +92,7 @@ export function InvestmentPlans() {
                       Daily objective
                     </dt>
                     <dd className={`mt-2 text-sm font-extrabold ${isFeatured ? "text-[#62e6a4]" : "text-[var(--color-brand-hover)]"}`}>
-                      {plan.objective}%
+                      {plan.dailyObjective}%
                     </dd>
                   </div>
                   <div className="px-1">

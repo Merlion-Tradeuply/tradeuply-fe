@@ -1,55 +1,22 @@
-export const investmentPlanTerms = [
-  {
-    horizonDays: 7,
-    id: "essential",
-    minimum: 50,
-    name: "Essential",
-    objective: 5,
-    risk: "Lower",
-  },
-  {
-    horizonDays: 7,
-    id: "income",
-    minimum: 500,
-    name: "Income",
-    objective: 7,
-    risk: "Low–moderate",
-  },
-  {
-    horizonDays: 7,
-    id: "balanced",
-    minimum: 1_000,
-    name: "Balanced",
-    objective: 10,
-    risk: "Moderate",
-  },
-  {
-    horizonDays: 5,
-    id: "global-growth",
-    minimum: 5_000,
-    name: "Global Growth",
-    objective: 13,
-    risk: "Moderate–high",
-  },
-  {
-    horizonDays: 5,
-    id: "future-focus",
-    minimum: 2_500,
-    name: "Future Focus",
-    objective: 18,
-    risk: "Higher",
-  },
-  {
-    horizonDays: 5,
-    id: "wealth-select",
-    minimum: 10_000,
-    name: "Wealth Select",
-    objective: 21,
-    risk: "Personalized",
-  },
-] as const;
+export type InvestmentPlan = {
+  allocation: string;
+  badge: string | null;
+  dailyObjective: number;
+  description: string;
+  displayOrder: number;
+  features: string[];
+  horizonDays: number;
+  icon: "chart" | "coins" | "globe" | "leaf" | "shield" | "sparkle";
+  id: string;
+  isFeatured: boolean;
+  minimumInvestment: number;
+  name: string;
+  risk: string;
+  slug: string;
+  status: "active" | "coming_soon" | "disabled";
+};
 
-export type InvestmentPlanId = (typeof investmentPlanTerms)[number]["id"];
+export type InvestmentPlanId = string;
 
 export function formatUsd(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -67,10 +34,5 @@ export function calculatePlanProjection(
 ) {
   const dailyProfit = amount * (dailyObjective / 100);
   const profit = dailyProfit * horizonDays;
-
-  return {
-    dailyProfit,
-    profit,
-    total: amount + profit,
-  };
+  return { dailyProfit, profit, total: amount + profit };
 }

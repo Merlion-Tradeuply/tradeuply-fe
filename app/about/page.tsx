@@ -16,13 +16,16 @@ import Link from "next/link";
 
 import { ContactOffices } from "@/components/contact/contact-offices";
 import { Container } from "@/components/ui/container";
-import { formatUsd, investmentPlanTerms } from "@/data/investment-plans";
+import { formatUsd } from "@/data/investment-plans";
+import { getPublicInvestmentPlans } from "@/services/investment-plan.service";
 
 export const metadata: Metadata = {
   title: "About TradeUply | Clear and Structured Investing",
   description:
     "Learn how TradeUply combines structured investment plans, transparent profit projections, multiple market categories, and clear risk information.",
 };
+
+export const dynamic = "force-dynamic";
 
 const purposeCards = [
   {
@@ -72,18 +75,27 @@ const processSteps = [
   { icon: ChartLineUp, number: "04", title: "Track progress" },
 ] as const;
 
-const minimumInvestment = Math.min(...investmentPlanTerms.map((plan) => plan.minimum));
-const minimumTerm = Math.min(...investmentPlanTerms.map((plan) => plan.horizonDays));
-const maximumTerm = Math.max(...investmentPlanTerms.map((plan) => plan.horizonDays));
+export default async function AboutPage() {
+  const plans = await getPublicInvestmentPlans();
+  const minimumInvestment = plans.length
+    ? Math.min(...plans.map((plan) => plan.minimumInvestment))
+    : 0;
+  const minimumTerm = plans.length
+    ? Math.min(...plans.map((plan) => plan.horizonDays))
+    : 0;
+  const maximumTerm = plans.length
+    ? Math.max(...plans.map((plan) => plan.horizonDays))
+    : 0;
+  const platformFacts = [
+    { label: "Structured plans", value: String(plans.length) },
+    { label: "Starting amount", value: formatUsd(minimumInvestment) },
+    {
+      label: "Plan durations",
+      value: plans.length ? `${minimumTerm}–${maximumTerm} days` : "Available soon",
+    },
+    { label: "Market categories", value: "6" },
+  ] as const;
 
-const platformFacts = [
-  { label: "Structured plans", value: String(investmentPlanTerms.length) },
-  { label: "Starting amount", value: formatUsd(minimumInvestment) },
-  { label: "Plan durations", value: `${minimumTerm}–${maximumTerm} days` },
-  { label: "Market categories", value: "6" },
-] as const;
-
-export default function AboutPage() {
   return (
     <main className="mt-[7.5rem] min-h-screen bg-white sm:mt-[8.5rem] lg:mt-36">
       <section className="relative overflow-hidden bg-[#f4f8f6] py-16 sm:py-20 lg:py-28">

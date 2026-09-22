@@ -12,7 +12,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Container } from "@/components/ui/container";
-import { formatUsd, investmentPlanTerms } from "@/data/investment-plans";
+import { formatUsd, type InvestmentPlan } from "@/data/investment-plans";
 
 const investmentPrinciples = [
   {
@@ -42,18 +42,18 @@ const strategyMarkets = [
   { icon: Bank, label: "ETFs" },
 ] as const;
 
-const minimumInvestment = Math.min(...investmentPlanTerms.map((plan) => plan.minimum));
-const minimumTerm = Math.min(...investmentPlanTerms.map((plan) => plan.horizonDays));
-const maximumTerm = Math.max(...investmentPlanTerms.map((plan) => plan.horizonDays));
-
-const platformFacts = [
-  { label: "Investment plans", value: String(investmentPlanTerms.length) },
-  { label: "Minimum starting amount", value: formatUsd(minimumInvestment) },
-  { label: "Plan durations", value: `${minimumTerm}–${maximumTerm} days` },
-  { label: "Market categories", value: String(strategyMarkets.length) },
-] as const;
-
-export function InvestmentApproach() {
+export function InvestmentApproach({ plans }: { plans: InvestmentPlan[] }) {
+  const minimumInvestment = plans.length
+    ? Math.min(...plans.map((plan) => plan.minimumInvestment))
+    : 0;
+  const minimumTerm = plans.length ? Math.min(...plans.map((plan) => plan.horizonDays)) : 0;
+  const maximumTerm = plans.length ? Math.max(...plans.map((plan) => plan.horizonDays)) : 0;
+  const platformFacts = [
+    { label: "Investment plans", value: String(plans.length) },
+    { label: "Minimum starting amount", value: formatUsd(minimumInvestment) },
+    { label: "Plan durations", value: plans.length ? `${minimumTerm}–${maximumTerm} days` : "—" },
+    { label: "Market categories", value: String(strategyMarkets.length) },
+  ];
   return (
     <section
       aria-labelledby="approach-title"

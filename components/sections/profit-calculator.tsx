@@ -15,36 +15,38 @@ import { Container } from "@/components/ui/container";
 import {
   calculatePlanProjection,
   formatUsd,
-  investmentPlanTerms,
-  type InvestmentPlanId,
+  type InvestmentPlan,
 } from "@/data/investment-plans";
 
-export function ProfitCalculator() {
-  const [selectedPlanId, setSelectedPlanId] = useState<InvestmentPlanId>("balanced");
+export function ProfitCalculator({ plans }: { plans: InvestmentPlan[] }) {
+  const [selectedPlanId, setSelectedPlanId] = useState(
+    plans.find((plan) => plan.isFeatured)?.id ?? plans[0]?.id ?? "",
+  );
   const [amount, setAmount] = useState("1000");
 
-  const selectedPlan =
-    investmentPlanTerms.find((plan) => plan.id === selectedPlanId) ?? investmentPlanTerms[2];
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? plans[0];
+  if (!selectedPlan) return null;
   const amountValue = Number(amount);
-  const isValidAmount = Number.isFinite(amountValue) && amountValue >= selectedPlan.minimum;
+  const isValidAmount =
+    Number.isFinite(amountValue) && amountValue >= selectedPlan.minimumInvestment;
   const projection = calculatePlanProjection(
     isValidAmount ? amountValue : 0,
-    selectedPlan.objective,
+    selectedPlan.dailyObjective,
     selectedPlan.horizonDays,
   );
   const quickAmounts = [
-    selectedPlan.minimum,
-    selectedPlan.minimum * 2,
-    selectedPlan.minimum * 5,
+    selectedPlan.minimumInvestment,
+    selectedPlan.minimumInvestment * 2,
+    selectedPlan.minimumInvestment * 5,
   ];
 
-  function selectPlan(planId: InvestmentPlanId) {
-    const nextPlan = investmentPlanTerms.find((plan) => plan.id === planId);
+  function selectPlan(planId: string) {
+    const nextPlan = plans.find((plan) => plan.id === planId);
 
     if (!nextPlan) return;
 
     setSelectedPlanId(planId);
-    setAmount(String(nextPlan.minimum));
+    setAmount(String(nextPlan.minimumInvestment));
   }
 
   return (
@@ -96,7 +98,7 @@ export function ProfitCalculator() {
                 Select an investment plan
               </legend>
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {investmentPlanTerms.map((plan) => {
+                {plans.map((plan) => {
                   const isSelected = plan.id === selectedPlan.id;
 
                   return (
@@ -136,9 +138,9 @@ export function ProfitCalculator() {
                   }`}
                   id="investment-amount"
                   inputMode="decimal"
-                  min={selectedPlan.minimum}
+                  min={selectedPlan.minimumInvestment}
                   onChange={(event) => setAmount(event.target.value)}
-                  placeholder={String(selectedPlan.minimum)}
+                  placeholder={String(selectedPlan.minimumInvestment)}
                   step="any"
                   type="number"
                   value={amount}
@@ -151,8 +153,8 @@ export function ProfitCalculator() {
                 id="investment-amount-help"
               >
                 {amount !== "" && !isValidAmount
-                  ? `The ${selectedPlan.name} plan requires at least ${formatUsd(selectedPlan.minimum)}.`
-                  : `Minimum for ${selectedPlan.name}: ${formatUsd(selectedPlan.minimum)}`}
+                  ? `The ${selectedPlan.name} plan requires at least ${formatUsd(selectedPlan.minimumInvestment)}.`
+                  : `Minimum for ${selectedPlan.name}: ${formatUsd(selectedPlan.minimumInvestment)}`}
               </p>
             </div>
 
@@ -221,7 +223,7 @@ export function ProfitCalculator() {
               </p>
               <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/[0.08] px-4 py-2 text-xs font-extrabold text-white/75">
                 <CheckCircle aria-hidden="true" className="text-[#67e4a7]" size={17} weight="fill" />
-                {selectedPlan.objective}% daily objective · {selectedPlan.horizonDays}-day term
+                {selectedPlan.dailyObjective}% daily objective · {selectedPlan.horizonDays}-day term
               </p>
             </output>
 
@@ -235,7 +237,7 @@ export function ProfitCalculator() {
                 <CalculationValue
                   align="center"
                   label="Daily objective"
-                  value={`${selectedPlan.objective}%`}
+                  value={`${selectedPlan.dailyObjective}%`}
                 />
                 <CalculationOperator symbol="=" />
                 <CalculationValue
