@@ -45,10 +45,10 @@ const initialData: ClientRegistrationData = {
 const steps = ["Personal details", "Account security", "Investor profile"] as const;
 
 const investmentRangeOptions = [
-  { label: "$100–$999", value: "$100–$999" },
-  { label: "$1,000–$4,999", value: "$1,000–$4,999" },
-  { label: "$5,000–$24,999", value: "$5,000–$24,999" },
-  { label: "$25,000+", value: "$25,000+" },
+  { label: "$50–$249", value: "$50–$249" },
+  { label: "$250–$449", value: "$250–$449" },
+  { label: "$500–$999", value: "$500–$999" },
+  { label: "$1000+", value: "$1000+" },
 ] as const;
 
 const experienceOptions = [
@@ -225,146 +225,146 @@ export function ClientRegistrationForm() {
           onVerified={() => setRegistrationStage("complete")}
         />
       ) : (
-      <form aria-busy={isSubmitting} className="mt-9" noValidate onSubmit={handleSubmit}>
-        <h3 className="sr-only" ref={stepHeadingRef} tabIndex={-1}>
-          Step {currentStep}: {steps[currentStep - 1]}
-        </h3>
+        <form aria-busy={isSubmitting} className="mt-9" noValidate onSubmit={handleSubmit}>
+          <h3 className="sr-only" ref={stepHeadingRef} tabIndex={-1}>
+            Step {currentStep}: {steps[currentStep - 1]}
+          </h3>
 
-        {currentStep === 1 && (
-          <fieldset disabled={isSubmitting}>
-            <legend className="text-lg font-extrabold tracking-[-0.025em] text-[var(--color-ink)]">
-              Tell us about yourself
-            </legend>
-            <p className="mt-2 text-sm leading-6 font-medium text-[var(--color-text-muted)]">
-              Use an email address and phone number you can access.
-            </p>
-
-            <div className="mt-7 grid gap-5 sm:grid-cols-2">
-              <TextField autoComplete="given-name" error={errors.firstName} id="firstName" label="First name" onChange={(value) => updateField("firstName", value)} value={data.firstName} />
-              <TextField autoComplete="family-name" error={errors.lastName} id="lastName" label="Last name" onChange={(value) => updateField("lastName", value)} value={data.lastName} />
-            </div>
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              <TextField autoComplete="email" error={errors.email} id="email" inputMode="email" label="Email address" onChange={(value) => updateField("email", value)} placeholder="name@example.com" type="email" value={data.email} />
-              <TextField autoComplete="tel" error={errors.phone} help="Include the international country code." id="phone" inputMode="tel" label="Phone number" onChange={(value) => updateField("phone", value)} placeholder="+91 98765 43210" type="tel" value={data.phone} />
-            </div>
-          </fieldset>
-        )}
-
-        {currentStep === 2 && (
-          <fieldset disabled={isSubmitting}>
-            <legend className="text-lg font-extrabold tracking-[-0.025em] text-[var(--color-ink)]">
-              Secure your account
-            </legend>
-            <p className="mt-2 text-sm leading-6 font-medium text-[var(--color-text-muted)]">
-              Create a strong password that you do not use elsewhere.
-            </p>
-
-            <div className="mt-7 grid gap-5 sm:grid-cols-2">
-              <PasswordField error={errors.password} id="password" label="Password" onChange={(value) => updateField("password", value)} onToggle={() => setShowPassword((visible) => !visible)} show={showPassword} value={data.password} />
-              <PasswordField error={errors.confirmPassword} id="confirmPassword" label="Confirm password" onChange={(value) => updateField("confirmPassword", value)} onToggle={() => setShowPassword((visible) => !visible)} show={showPassword} value={data.confirmPassword} />
-            </div>
-
-            <div className="mt-4">
-              <div className="grid grid-cols-5 gap-1.5" aria-label={`Password strength ${passwordStrength} out of 5`}>
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <span className={`h-1.5 rounded-full ${level <= passwordStrength ? "bg-[var(--color-brand)]" : "bg-slate-200"}`} key={level} />
-                ))}
-              </div>
-              <p className="mt-2 text-xs font-semibold text-[var(--color-text-muted)]">
-                Use 8+ characters with uppercase, lowercase, and a number.
+          {currentStep === 1 && (
+            <fieldset disabled={isSubmitting}>
+              <legend className="text-lg font-extrabold tracking-[-0.025em] text-[var(--color-ink)]">
+                Tell us about yourself
+              </legend>
+              <p className="mt-2 text-sm leading-6 font-medium text-[var(--color-text-muted)]">
+                Use an email address and phone number you can access.
               </p>
-            </div>
 
-            <div className="mt-7 grid gap-3">
-              <CheckboxField checked={data.ageConfirmed} error={errors.ageConfirmed} id="ageConfirmed" onChange={(checked) => updateField("ageConfirmed", checked)}>
-                I confirm that I am at least 18 years old.
-              </CheckboxField>
-              <CheckboxField checked={data.termsAccepted} error={errors.termsAccepted} id="termsAccepted" onChange={(checked) => updateField("termsAccepted", checked)}>
-                I agree to the Terms and Conditions and acknowledge the Privacy Policy.
-              </CheckboxField>
-            </div>
-          </fieldset>
-        )}
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
+                <TextField autoComplete="given-name" error={errors.firstName} id="firstName" label="First name" onChange={(value) => updateField("firstName", value)} value={data.firstName} />
+                <TextField autoComplete="family-name" error={errors.lastName} id="lastName" label="Last name" onChange={(value) => updateField("lastName", value)} value={data.lastName} />
+              </div>
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <TextField autoComplete="email" error={errors.email} id="email" inputMode="email" label="Email address" onChange={(value) => updateField("email", value)} placeholder="name@example.com" type="email" value={data.email} />
+                <TextField autoComplete="tel" error={errors.phone} help="Include the international country code." id="phone" inputMode="tel" label="Phone number" onChange={(value) => updateField("phone", value)} placeholder="+91 98765 43210" type="tel" value={data.phone} />
+              </div>
+            </fieldset>
+          )}
 
-        {currentStep === 3 && (
-          <fieldset disabled={isSubmitting}>
-            <legend className="text-lg font-extrabold tracking-[-0.025em] text-[var(--color-ink)]">
-              Complete your investor profile
-            </legend>
-            <p className="mt-2 text-sm leading-6 font-medium text-[var(--color-text-muted)]">
-              These preferences help structure your account experience and do not constitute investment advice.
-            </p>
+          {currentStep === 2 && (
+            <fieldset disabled={isSubmitting}>
+              <legend className="text-lg font-extrabold tracking-[-0.025em] text-[var(--color-ink)]">
+                Secure your account
+              </legend>
+              <p className="mt-2 text-sm leading-6 font-medium text-[var(--color-text-muted)]">
+                Create a strong password that you do not use elsewhere.
+              </p>
 
-            <div className="mt-7 grid gap-5 sm:grid-cols-2">
-              <CustomSelect error={errors.investmentRange} id="investmentRange" label="Intended investment range" onChange={(value) => updateField("investmentRange", value)} options={investmentRangeOptions} placeholder="Select a range" value={data.investmentRange} />
-              <CustomSelect error={errors.experience} id="experience" label="Investment experience" onChange={(value) => updateField("experience", value)} options={experienceOptions} placeholder="Select experience" value={data.experience} />
-            </div>
-            <div className="mt-5">
-              <CustomSelect error={errors.objective} id="objective" label="Primary investment objective" onChange={(value) => updateField("objective", value)} options={objectiveOptions} placeholder="Select an objective" value={data.objective} />
-            </div>
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
+                <PasswordField error={errors.password} id="password" label="Password" onChange={(value) => updateField("password", value)} onToggle={() => setShowPassword((visible) => !visible)} show={showPassword} value={data.password} />
+                <PasswordField error={errors.confirmPassword} id="confirmPassword" label="Confirm password" onChange={(value) => updateField("confirmPassword", value)} onToggle={() => setShowPassword((visible) => !visible)} show={showPassword} value={data.confirmPassword} />
+              </div>
 
-            <dl className="mt-7 grid grid-cols-2 gap-3 rounded-2xl bg-[#f4f8f6] p-4 text-sm sm:grid-cols-4">
-              <ReviewItem label="Name" value={`${data.firstName} ${data.lastName}`} />
-              <ReviewItem label="Email" value={data.email} />
-              <ReviewItem label="Phone" value={data.phone} />
-              <ReviewItem label="Range" value={data.investmentRange || "Not selected"} />
-            </dl>
+              <div className="mt-4">
+                <div className="grid grid-cols-5 gap-1.5" aria-label={`Password strength ${passwordStrength} out of 5`}>
+                  {[1, 2, 3, 4, 5].map((level) => (
+                    <span className={`h-1.5 rounded-full ${level <= passwordStrength ? "bg-[var(--color-brand)]" : "bg-slate-200"}`} key={level} />
+                  ))}
+                </div>
+                <p className="mt-2 text-xs font-semibold text-[var(--color-text-muted)]">
+                  Use 8+ characters with uppercase, lowercase, and a number.
+                </p>
+              </div>
 
-            <div className="mt-6">
-              <CheckboxField checked={data.riskAccepted} error={errors.riskAccepted} id="riskAccepted" onChange={(checked) => updateField("riskAccepted", checked)}>
-                I understand that investment objectives and calculator results are illustrative, returns are not guaranteed, and capital may be at risk.
-              </CheckboxField>
-            </div>
-          </fieldset>
-        )}
+              <div className="mt-7 grid gap-3">
+                <CheckboxField checked={data.ageConfirmed} error={errors.ageConfirmed} id="ageConfirmed" onChange={(checked) => updateField("ageConfirmed", checked)}>
+                  I confirm that I am at least 18 years old.
+                </CheckboxField>
+                <CheckboxField checked={data.termsAccepted} error={errors.termsAccepted} id="termsAccepted" onChange={(checked) => updateField("termsAccepted", checked)}>
+                  I agree to the Terms and Conditions and acknowledge the Privacy Policy.
+                </CheckboxField>
+              </div>
+            </fieldset>
+          )}
 
-        {formError && (
-          <p className="mt-6 flex items-start gap-2 rounded-xl border border-[#efc1b3] bg-[#fff8f5] px-4 py-3 text-xs leading-5 font-bold text-[#a83f26]" role="alert">
-            <WarningCircle aria-hidden="true" className="mt-0.5 shrink-0" size={17} weight="fill" />
-            {formError}
-          </p>
-        )}
+          {currentStep === 3 && (
+            <fieldset disabled={isSubmitting}>
+              <legend className="text-lg font-extrabold tracking-[-0.025em] text-[var(--color-ink)]">
+                Complete your investor profile
+              </legend>
+              <p className="mt-2 text-sm leading-6 font-medium text-[var(--color-text-muted)]">
+                These preferences help structure your account experience and do not constitute investment advice.
+              </p>
 
-        <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          {currentStep > 1 ? (
-            <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-5 text-sm font-extrabold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-50" disabled={isSubmitting} onClick={goBack} type="button">
-              <ArrowLeft aria-hidden="true" size={17} weight="bold" />
-              Previous
-            </button>
-          ) : (
-            <p className="text-center text-sm font-semibold text-[var(--color-text-muted)] sm:text-left">
-              Already have an account?{" "}
-              <Link
-                className="font-extrabold text-[var(--color-brand-hover)] hover:underline"
-                href="/login"
-              >
-                Log In
-              </Link>
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
+                <CustomSelect error={errors.investmentRange} id="investmentRange" label="Intended investment range" onChange={(value) => updateField("investmentRange", value)} options={investmentRangeOptions} placeholder="Select a range" value={data.investmentRange} />
+                <CustomSelect error={errors.experience} id="experience" label="Investment experience" onChange={(value) => updateField("experience", value)} options={experienceOptions} placeholder="Select experience" value={data.experience} />
+              </div>
+              <div className="mt-5">
+                <CustomSelect error={errors.objective} id="objective" label="Primary investment objective" onChange={(value) => updateField("objective", value)} options={objectiveOptions} placeholder="Select an objective" value={data.objective} />
+              </div>
+
+              <dl className="mt-7 grid grid-cols-2 gap-3 rounded-2xl bg-[#f4f8f6] p-4 text-sm sm:grid-cols-4">
+                <ReviewItem label="Name" value={`${data.firstName} ${data.lastName}`} />
+                <ReviewItem label="Email" value={data.email} />
+                <ReviewItem label="Phone" value={data.phone} />
+                <ReviewItem label="Range" value={data.investmentRange || "Not selected"} />
+              </dl>
+
+              <div className="mt-6">
+                <CheckboxField checked={data.riskAccepted} error={errors.riskAccepted} id="riskAccepted" onChange={(checked) => updateField("riskAccepted", checked)}>
+                  I understand that investment objectives and calculator results are illustrative, returns are not guaranteed, and capital may be at risk.
+                </CheckboxField>
+              </div>
+            </fieldset>
+          )}
+
+          {formError && (
+            <p className="mt-6 flex items-start gap-2 rounded-xl border border-[#efc1b3] bg-[#fff8f5] px-4 py-3 text-xs leading-5 font-bold text-[#a83f26]" role="alert">
+              <WarningCircle aria-hidden="true" className="mt-0.5 shrink-0" size={17} weight="fill" />
+              {formError}
             </p>
           )}
 
-          {currentStep < steps.length ? (
-            <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)]" onClick={continueToNextStep} type="button">
-              Continue
-              <ArrowRight aria-hidden="true" size={17} weight="bold" />
-            </button>
-          ) : (
-            <button className="inline-flex min-h-12 min-w-[12.5rem] items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)] disabled:cursor-wait disabled:translate-y-0 disabled:opacity-80" disabled={isSubmitting} type="submit">
-              {isSubmitting ? (
-                <>
-                  <CircleNotch aria-hidden="true" className="animate-spin" size={19} weight="bold" />
-                  Creating account…
-                </>
-              ) : (
-                <>
-                  <ShieldCheck aria-hidden="true" size={18} weight="duotone" />
-                  Create My Account
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </form>
+          <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            {currentStep > 1 ? (
+              <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-5 text-sm font-extrabold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-50" disabled={isSubmitting} onClick={goBack} type="button">
+                <ArrowLeft aria-hidden="true" size={17} weight="bold" />
+                Previous
+              </button>
+            ) : (
+              <p className="text-center text-sm font-semibold text-[var(--color-text-muted)] sm:text-left">
+                Already have an account?{" "}
+                <Link
+                  className="font-extrabold text-[var(--color-brand-hover)] hover:underline"
+                  href="/login"
+                >
+                  Log In
+                </Link>
+              </p>
+            )}
+
+            {currentStep < steps.length ? (
+              <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)]" onClick={continueToNextStep} type="button">
+                Continue
+                <ArrowRight aria-hidden="true" size={17} weight="bold" />
+              </button>
+            ) : (
+              <button className="inline-flex min-h-12 min-w-[12.5rem] items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)] disabled:cursor-wait disabled:translate-y-0 disabled:opacity-80" disabled={isSubmitting} type="submit">
+                {isSubmitting ? (
+                  <>
+                    <CircleNotch aria-hidden="true" className="animate-spin" size={19} weight="bold" />
+                    Creating account…
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck aria-hidden="true" size={18} weight="duotone" />
+                    Create My Account
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </form>
       )}
     </section>
   );
