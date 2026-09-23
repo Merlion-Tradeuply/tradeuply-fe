@@ -135,12 +135,19 @@ export type Deposit = {
   amount: string;
   asset: string;
   clientNotes: string;
+  convertedAmount: string | null;
+  convertedAsset: string | null;
   createdAt: string;
   destinationWalletAddress: string;
   id: string;
   methodCode: string;
   methodName: string;
   network: string;
+  paymentCategory: "crypto" | "wallet";
+  exchangeRate: string | null;
+  quoteExpiresAt: string | null;
+  rateQuotedAt: string | null;
+  rateSource: string | null;
   reviewNotes: string;
   reviewedAt: string | null;
   senderWalletAddress: string;
@@ -269,6 +276,8 @@ export type ClientTransaction = {
   id: string;
   reference: string;
   source: string;
+  sourceAmount: string | null;
+  sourceCurrency: string | null;
   type: ClientTransactionType;
 };
 

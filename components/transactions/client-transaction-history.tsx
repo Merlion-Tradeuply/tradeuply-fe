@@ -406,6 +406,11 @@ function TransactionCard({ transaction }: { transaction: ClientTransaction }) {
                   ${Number(transaction.amountUsd).toFixed(2)} USD
                 </span>
               )}
+              {transaction.sourceAmount && transaction.sourceCurrency && (
+                <span className="mt-0.5 block text-[0.56rem] font-semibold text-[var(--color-text-muted)]">
+                  From {transaction.sourceCurrency === "INR" ? `₹${Number(transaction.sourceAmount).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : `${formatAmount(transaction.sourceAmount)} ${transaction.sourceCurrency}`}
+                </span>
+              )}
             </div>
           </div>
 
@@ -496,6 +501,11 @@ function TransactionRow({ transaction }: { transaction: ClientTransaction }) {
         {transaction.amountUsd && (
           <p className="mt-1 text-[0.58rem] font-semibold text-[var(--color-text-muted)]">
             ${Number(transaction.amountUsd).toFixed(2)} USD
+          </p>
+        )}
+        {transaction.sourceAmount && transaction.sourceCurrency && (
+          <p className="mt-1 text-[0.58rem] font-semibold text-[var(--color-text-muted)]">
+            From {transaction.sourceCurrency === "INR" ? `₹${Number(transaction.sourceAmount).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : `${formatAmount(transaction.sourceAmount)} ${transaction.sourceCurrency}`}
           </p>
         )}
       </td>

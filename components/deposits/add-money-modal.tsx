@@ -118,7 +118,8 @@ export function AddMoneyModal({
               <p className="mt-3 text-sm leading-7 font-medium text-[var(--color-text-muted)]">Your {submittedDeposit.amount} {submittedDeposit.asset} transaction is pending administrator verification. Your {submittedDeposit.asset} wallet balance will update only after approval.</p>
               <button className="mt-7 rounded-xl bg-[var(--color-brand)] px-7 py-3 text-sm font-extrabold text-white" onClick={closeModal} type="button">{completionButtonLabel}</button>
             </div>
-          ) : selectedMethod?.category === "crypto" &&
+          ) : selectedMethod &&
+            ["crypto", "wallet"].includes(selectedMethod.category) &&
             selectedMethod.asset &&
             selectedMethod.walletAddress &&
             selectedMethod.network &&

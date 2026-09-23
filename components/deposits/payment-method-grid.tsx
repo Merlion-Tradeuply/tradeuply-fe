@@ -29,11 +29,13 @@ export function PaymentMethodGrid({
   onSelect: (method: PaymentMethod) => void;
   selectedCode: string | null;
 }) {
-  const cryptoMethods = methods.filter((method) => method.category === "crypto");
+  const depositMethods = methods.filter((method) =>
+    ["crypto", "wallet"].includes(method.category),
+  );
 
   return (
     <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-      {cryptoMethods.map((method) => {
+      {depositMethods.map((method) => {
         const Icon = icons[method.code as keyof typeof icons] ?? Wallet;
         const isAvailable =
           method.status === "active" &&
@@ -65,7 +67,7 @@ export function PaymentMethodGrid({
               <span className="block truncate text-sm font-extrabold text-[var(--color-ink)]">{method.name}</span>
               <span className="mt-1 block text-[0.68rem] font-bold text-[var(--color-text-muted)]">
                 {isAvailable
-                  ? `${method.asset} · ${method.network} · Available`
+                  ? `${method.category === "wallet" ? "Digital Wallet" : method.asset} · ${method.network} · Available`
                   : method.status === "active"
                     ? "Configuration required"
                     : "Coming soon"}

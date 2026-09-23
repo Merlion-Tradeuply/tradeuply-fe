@@ -51,6 +51,7 @@ export function CryptoDepositForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const asset = method.asset ?? "Crypto";
   const walletAddress = method.walletAddress ?? "";
+  const isUpi = method.category === "wallet";
 
   function updateField(field: keyof DepositForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -96,7 +97,7 @@ export function CryptoDepositForm({
       <section className="min-w-0 overflow-hidden rounded-[1.25rem] bg-[var(--color-ink)] p-4 text-white sm:rounded-[1.5rem] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[0.65rem] font-extrabold tracking-[0.18em] text-[#67e4a7] uppercase">
-            TradeUply Receiving Wallet
+            {isUpi ? "TradeUply UPI" : "TradeUply Receiving Wallet"}
           </p>
           <div
             aria-live="polite"
@@ -117,7 +118,7 @@ export function CryptoDepositForm({
         <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.06] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="text-xs font-extrabold text-white/55">
-              Network
+              {isUpi ? "Payment rail" : "Network"}
             </span>
             <span className="rounded-full bg-[#67e4a7]/12 px-3 py-1 text-xs font-extrabold text-[#67e4a7]">
               {method.network}
@@ -132,7 +133,7 @@ export function CryptoDepositForm({
             type="button"
           >
             {copied ? <Check size={16} weight="bold" /> : <Copy size={16} />}
-            {copied ? "Wallet copied" : "Copy wallet address"}
+            {copied ? (isUpi ? "UPI ID copied" : "Wallet copied") : (isUpi ? "Copy UPI ID" : "Copy wallet address")}
           </button>
         </div>
         <div className="mt-4 flex gap-3 rounded-xl bg-[#e6b75f]/12 p-4 text-[#ffe1a3]">
@@ -142,8 +143,9 @@ export function CryptoDepositForm({
             weight="duotone"
           />
           <p className="text-[0.68rem] leading-5 font-semibold">
-            {method.instructions ||
-              `Send only ${asset} through ${method.network}. Using another asset or network can permanently lose your funds.`}
+            {method.instructions || (isUpi
+              ? "Pay the exact INR amount to the displayed UPI ID and retain the UPI transaction ID / UTR for verification."
+              : `Send only ${asset} through ${method.network}. Using another asset or network can permanently lose your funds.`)}
           </p>
         </div>
       </section>
@@ -156,8 +158,9 @@ export function CryptoDepositForm({
           Submit transaction details
         </h3>
         <p className="mt-2 text-xs leading-5 font-medium text-[var(--color-text-muted)]">
-          Complete the transfer first, then provide the blockchain details
-          below.
+          {isUpi
+            ? "Complete the UPI payment first, then provide the payment details below."
+            : "Complete the transfer first, then provide the blockchain details below."}
         </p>
 
         {initialAmount && referenceUsdAmount && (
@@ -180,11 +183,11 @@ export function CryptoDepositForm({
         <input
           className="mt-2 h-13 w-full rounded-xl border border-[var(--color-border)] bg-[#f8faf9] px-4 text-sm font-bold outline-none focus:border-[var(--color-brand)]"
           id="deposit-amount"
-          min={method.minimumAmount ?? "0.00000001"}
+          min={isUpi ? undefined : (method.minimumAmount ?? "0.00000001")}
           onChange={(event) => updateField("amount", event.target.value)}
           readOnly={Boolean(initialAmount)}
           required
-          step="0.00000001"
+          step={isUpi ? "0.01" : "0.00000001"}
           type="number"
           value={form.amount}
         />
@@ -193,7 +196,7 @@ export function CryptoDepositForm({
           className="mt-4 block text-xs font-extrabold text-[var(--color-ink)]"
           htmlFor="sender-wallet"
         >
-          Sender wallet address
+          {isUpi ? "Payer UPI ID" : "Sender wallet address"}
         </label>
         <input
           className="mt-2 h-13 w-full rounded-xl border border-[var(--color-border)] bg-[#f8faf9] px-4 text-sm font-bold outline-none focus:border-[var(--color-brand)]"
@@ -209,7 +212,7 @@ export function CryptoDepositForm({
           className="mt-4 block text-xs font-extrabold text-[var(--color-ink)]"
           htmlFor="transaction-hash"
         >
-          Blockchain transaction ID / hash
+          {isUpi ? "UPI transaction ID / UTR" : "Blockchain transaction ID / hash"}
         </label>
         <input
           className="mt-2 h-13 w-full rounded-xl border border-[var(--color-border)] bg-[#f8faf9] px-4 text-sm font-bold outline-none focus:border-[var(--color-brand)]"
@@ -221,8 +224,9 @@ export function CryptoDepositForm({
           value={form.transactionHash}
         />
         <p className="mt-2 text-[0.68rem] leading-5 font-medium text-[var(--color-text-muted)]">
-          Enter the transaction ID generated by your wallet after sending funds
-          to the TradeUply receiving wallet.
+          {isUpi
+            ? "Enter the UPI transaction ID or UTR generated after completing the payment."
+            : "Enter the transaction ID generated by your wallet after sending funds to the TradeUply receiving wallet."}
         </p>
 
         <label

@@ -53,7 +53,7 @@ export function DepositHistory({ deposits }: { deposits: Deposit[] }) {
               type="button"
             >
               <span className="min-w-0">
-                <span className="block text-sm font-extrabold text-[var(--color-ink)]">{deposit.amount} {deposit.asset}</span>
+                <span className="block text-sm font-extrabold text-[var(--color-ink)]">{deposit.asset === "INR" ? `₹${Number(deposit.amount).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : `${deposit.amount} ${deposit.asset}`}</span>
                 <span className="mt-1 block truncate text-xs font-semibold text-[var(--color-text-muted)]">{deposit.transactionHash}</span>
               </span>
               <span className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -71,8 +71,15 @@ export function DepositHistory({ deposits }: { deposits: Deposit[] }) {
           <section className="relative max-h-[94dvh] w-full min-w-0 max-w-xl overflow-y-auto rounded-t-[1.5rem] bg-white p-4 shadow-2xl sm:max-h-[88vh] sm:rounded-[2rem] sm:p-8">
             <button aria-label="Close" className="absolute top-5 right-5 grid size-10 place-items-center rounded-xl bg-slate-100" onClick={() => setSelected(null)} type="button"><X size={19} weight="bold" /></button>
             <p className="text-xs font-extrabold tracking-[0.16em] text-[var(--color-brand-hover)] uppercase">Transaction activity</p>
-            <h3 className="mt-2 text-xl font-extrabold text-[var(--color-ink)]">{selected.amount} {selected.asset}</h3>
+            <h3 className="mt-2 text-xl font-extrabold text-[var(--color-ink)]">{selected.asset === "INR" ? `₹${Number(selected.amount).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : `${selected.amount} ${selected.asset}`}</h3>
             <p className="mt-2 break-all text-xs font-semibold text-[var(--color-text-muted)]">{selected.transactionHash}</p>
+            {selected.convertedAsset && selected.convertedAmount && (
+              <div className="mt-4 rounded-xl bg-[var(--color-brand-soft)] p-4">
+                <p className="text-[0.6rem] font-extrabold tracking-[0.08em] text-[var(--color-brand-hover)] uppercase">Crypto wallet credited</p>
+                <p className="mt-1 text-sm font-extrabold text-[var(--color-ink)]">{Number(selected.convertedAmount).toFixed(8)} {selected.convertedAsset}</p>
+                {selected.exchangeRate && <p className="mt-1 text-[0.65rem] font-semibold text-[var(--color-text-muted)]">Rate: 1 {selected.asset} = {selected.exchangeRate} {selected.convertedAsset}</p>}
+              </div>
+            )}
             <ol className="mt-7 space-y-5 border-l border-[var(--color-border)] pl-6">
               {selected.activities.map((activity) => (
                 <li className="relative" key={activity.id}>
