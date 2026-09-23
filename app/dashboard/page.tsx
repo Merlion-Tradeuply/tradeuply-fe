@@ -17,6 +17,8 @@ import type {
   ClientBalance,
   Deposit,
   PaymentMethod,
+  ClientWalletPaymentMethod,
+  Withdrawal,
 } from "@/lib/api/types";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth/session";
 
@@ -50,17 +52,19 @@ async function getWalletData() {
   if (!accessToken) redirect("/login?returnTo=/dashboard");
 
   const authorization = { Authorization: `Bearer ${accessToken}` };
-  const [balanceResult, depositResult, methodResult] = await Promise.all([
+  const [balanceResult, depositResult, methodResult, walletMethodResult, withdrawalResult] = await Promise.all([
     requestBackend(API_ENDPOINTS.backend.clientBalance, { headers: authorization }),
     requestBackend(API_ENDPOINTS.backend.clientDeposits, { headers: authorization }),
     requestBackend(API_ENDPOINTS.backend.clientPaymentMethods, { headers: authorization }),
+    requestBackend(API_ENDPOINTS.backend.clientWallets, { headers: authorization }),
+    requestBackend(API_ENDPOINTS.backend.clientWithdrawals, { headers: authorization }),
   ]);
 
-  if ([balanceResult, depositResult, methodResult].some((result) => result.status === 401)) {
+  if ([balanceResult, depositResult, methodResult, walletMethodResult, withdrawalResult].some((result) => result.status === 401)) {
     redirect("/api/client/token/refresh?returnTo=/dashboard");
   }
 
-  if ([balanceResult, depositResult, methodResult].some((result) => result.status !== 200)) {
+  if ([balanceResult, depositResult, methodResult, walletMethodResult, withdrawalResult].some((result) => result.status !== 200)) {
     throw new Error("The account wallet could not be loaded.");
   }
 
@@ -68,6 +72,8 @@ async function getWalletData() {
     balances: (JSON.parse(balanceResult.body) as { data: { balances: ClientBalance[] } }).data.balances,
     deposits: (JSON.parse(depositResult.body) as { data: { deposits: Deposit[] } }).data.deposits,
     methods: (JSON.parse(methodResult.body) as { data: { methods: PaymentMethod[] } }).data.methods,
+    withdrawalMethods: (JSON.parse(walletMethodResult.body) as { data: { methods: ClientWalletPaymentMethod[] } }).data.methods,
+    withdrawals: (JSON.parse(withdrawalResult.body) as { data: { withdrawals: Withdrawal[] } }).data.withdrawals,
   };
 }
 

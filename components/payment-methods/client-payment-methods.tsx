@@ -4,7 +4,6 @@ import {
   Check,
   CheckCircle,
   Copy,
-  ImageSquare,
   PencilSimple,
   Plus,
   SpinnerGap,
@@ -14,7 +13,6 @@ import {
   WarningCircle,
   X,
 } from "@phosphor-icons/react";
-import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -23,12 +21,9 @@ import type { ClientWalletPaymentMethod } from "@/lib/api/types";
 import {
   deleteClientWallet,
   saveClientWallet,
-  uploadClientWalletQrCode,
   type ClientWalletPayload,
-  type WalletQrUploadProgress,
 } from "@/services/client-wallet.service";
 
-const maximumQrImageBytes = 4 * 1024 * 1024;
 const assetOptions: readonly SelectOption[] = [
   { label: "Bitcoin (BTC)", value: "BTC" },
   { label: "Ethereum (ETH)", value: "ETH" },
@@ -62,12 +57,6 @@ function getInitials(asset: string) {
   return asset.slice(0, 3).toUpperCase();
 }
 
-function uploadStageLabel(progress: WalletQrUploadProgress) {
-  if (progress.stage === "preparing") return "Preparing secure upload...";
-  if (progress.stage === "saving") return "Saving wallet QR code...";
-  return `Uploading QR code · ${progress.percentage}%`;
-}
-
 export function ClientPaymentMethods({
   initialMethods,
 }: {
@@ -92,14 +81,11 @@ export function ClientPaymentMethods({
         }
       : emptyForm,
   );
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState(initialEditingMethod?.qrCodeUrl ?? "");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<WalletQrUploadProgress | null>(null);
 
   const editId = searchParams.get("edit");
   const isAdding = searchParams.get("action") === "add";
@@ -125,11 +111,8 @@ export function ClientPaymentMethods({
 
   function openAddForm() {
     setForm(emptyForm);
-    setFile(null);
-    setPreviewUrl("");
     setError("");
     setMessage("");
-    setUploadProgress(null);
     changeRoute({ action: "add" });
   }
 
@@ -141,11 +124,8 @@ export function ClientPaymentMethods({
       network: method.network,
       walletAddress: method.walletAddress,
     });
-    setFile(null);
-    setPreviewUrl(method.qrCodeUrl ?? "");
     setError("");
     setMessage("");
-    setUploadProgress(null);
     changeRoute({ edit: method.id });
   }
 
@@ -158,22 +138,6 @@ export function ClientPaymentMethods({
     }));
   }
 
-  function selectQrFile(selectedFile?: File) {
-    if (!selectedFile) return;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(selectedFile.type)) {
-      setError("Select a PNG, JPEG, or WebP QR code image.");
-      return;
-    }
-    if (selectedFile.size > maximumQrImageBytes) {
-      setError("The QR code image must be 4 MB or smaller.");
-      return;
-    }
-    setError("");
-    setFile(selectedFile);
-    if (previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(URL.createObjectURL(selectedFile));
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -183,14 +147,9 @@ export function ClientPaymentMethods({
       setError("Complete the asset, network, wallet label, and wallet address.");
       return;
     }
-    if (!editingMethod && !file) {
-      setError("Add the QR code for this wallet.");
-      return;
-    }
-
     setIsSaving(true);
     try {
-      let saved = await saveClientWallet(
+      const saved = await saveClientWallet(
         {
           ...form,
           label: form.label.trim(),
@@ -198,14 +157,6 @@ export function ClientPaymentMethods({
         },
         editingMethod?.id,
       );
-
-      if (file) {
-        saved = await uploadClientWalletQrCode({
-          file,
-          methodId: saved.id,
-          onProgress: setUploadProgress,
-        });
-      }
 
       setMethods((current) => {
         const next = current.some((method) => method.id === saved.id)
@@ -226,7 +177,6 @@ export function ClientPaymentMethods({
       );
     } finally {
       setIsSaving(false);
-      setUploadProgress(null);
     }
   }
 
@@ -294,7 +244,7 @@ export function ClientPaymentMethods({
             </span>
             <h2 className="mt-4 text-lg font-extrabold text-[var(--color-ink)]">No wallets saved</h2>
             <p className="mt-2 text-sm font-medium text-[var(--color-text-muted)]">
-              Add your first crypto wallet and its QR code.
+              Add your first crypto wallet address for future withdrawals.
             </p>
           </div>
         </section>
@@ -324,11 +274,6 @@ export function ClientPaymentMethods({
                     {method.asset} · {method.network}
                   </p>
                 </div>
-                {method.qrCodeUrl && (
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-[var(--color-border)] bg-white">
-                    <Image alt={`${method.label} QR code`} fill sizes="64px" src={method.qrCodeUrl} />
-                  </div>
-                )}
               </div>
 
               <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#f4f8f6] p-3">
@@ -473,41 +418,6 @@ export function ClientPaymentMethods({
                 </label>
               </div>
 
-              <div className="mt-4">
-                <p className="text-sm font-extrabold text-[var(--color-ink)]">Wallet QR code</p>
-                <label className="mt-2.5 flex min-h-36 cursor-pointer items-center gap-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-4 transition hover:border-[var(--color-brand)]">
-                  {previewUrl ? (
-                    <span className="relative size-24 shrink-0 overflow-hidden rounded-xl border border-[var(--color-border)]">
-                      <Image
-                        alt="Selected wallet QR code"
-                        fill
-                        sizes="96px"
-                        src={previewUrl}
-                        unoptimized={previewUrl.startsWith("blob:")}
-                      />
-                    </span>
-                  ) : (
-                    <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
-                      <ImageSquare size={25} weight="duotone" />
-                    </span>
-                  )}
-                  <span>
-                    <strong className="block text-sm font-extrabold text-[var(--color-ink)]">
-                      {previewUrl ? "Replace QR image" : "Choose QR image"}
-                    </strong>
-                    <span className="mt-1 block text-xs font-medium text-[var(--color-text-muted)]">
-                      PNG, JPEG, or WebP · maximum 4 MB
-                    </span>
-                  </span>
-                  <input
-                    accept="image/png,image/jpeg,image/webp"
-                    className="sr-only"
-                    onChange={(event) => selectQrFile(event.target.files?.[0])}
-                    type="file"
-                  />
-                </label>
-              </div>
-
               <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--color-border)] bg-white p-4">
                 <button
                   aria-checked={form.isDefault}
@@ -529,21 +439,6 @@ export function ClientPaymentMethods({
                   </span>
                 </span>
               </label>
-
-              {uploadProgress && (
-                <div className="mt-4 rounded-xl bg-white p-4">
-                  <div className="flex justify-between gap-3 text-xs font-extrabold text-[var(--color-ink)]">
-                    <span>{uploadStageLabel(uploadProgress)}</span>
-                    <span>{uploadProgress.percentage}%</span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className="h-full rounded-full bg-[var(--color-brand)] transition-[width]"
-                      style={{ width: `${uploadProgress.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              )}
 
               <button
                 className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)] disabled:cursor-not-allowed disabled:opacity-65"

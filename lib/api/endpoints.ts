@@ -16,10 +16,7 @@ export const API_ENDPOINTS = {
     clientPaymentMethods: "/client/payment-methods",
     clientWallets: "/client/wallets",
     clientWallet: (methodId: string) => `/client/wallets/${methodId}`,
-    clientWalletQrSignature: (methodId: string) =>
-      `/client/wallets/${methodId}/qr-code/signature`,
-    clientWalletQrComplete: (methodId: string) =>
-      `/client/wallets/${methodId}/qr-code/complete`,
+    clientWithdrawals: "/client/withdrawals",
     clientTransactions: "/client/transactions",
     publicInvestmentPlans: "/investment-plans/public",
     clientRegistration: "/client/signup",
@@ -45,10 +42,7 @@ export const API_ENDPOINTS = {
     clientPaymentMethods: "/api/client/payment-methods",
     clientWallets: "/api/client/wallets",
     clientWallet: (methodId: string) => `/api/client/wallets/${methodId}`,
-    clientWalletQrSignature: (methodId: string) =>
-      `/api/client/wallets/${methodId}/qr-code/signature`,
-    clientWalletQrComplete: (methodId: string) =>
-      `/api/client/wallets/${methodId}/qr-code/complete`,
+    clientWithdrawals: "/api/client/withdrawals",
     clientTransactions: "/api/client/transactions",
     publicInvestmentPlans: "/api/investment-plans",
     clientTokenRefresh: "/api/client/token/refresh",

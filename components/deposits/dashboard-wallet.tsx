@@ -1,27 +1,35 @@
 "use client";
 
-import { ArrowDown, Plus, Wallet } from "@phosphor-icons/react";
+import { ArrowDown, ArrowUp, Plus, Wallet } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { AddMoneyModal } from "@/components/deposits/add-money-modal";
 import { DepositHistory } from "@/components/deposits/deposit-history";
-import type { ClientBalance, Deposit, PaymentMethod } from "@/lib/api/types";
+import { WithdrawModal } from "@/components/withdrawals/withdraw-modal";
+import { WithdrawalHistory } from "@/components/withdrawals/withdrawal-history";
+import type { ClientBalance, ClientWalletPaymentMethod, Deposit, PaymentMethod, Withdrawal } from "@/lib/api/types";
 
 export function DashboardWallet({
   balances,
   deposits: initialDeposits,
   methods,
+  withdrawalMethods,
+  withdrawals: initialWithdrawals,
 }: {
   balances: ClientBalance[];
   deposits: Deposit[];
   methods: PaymentMethod[];
+  withdrawalMethods: ClientWalletPaymentMethod[];
+  withdrawals: Withdrawal[];
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deposits, setDeposits] = useState(initialDeposits);
-  const fundedBalances = balances.filter(
+  const [walletBalances, setWalletBalances] = useState(balances);
+  const [withdrawals, setWithdrawals] = useState(initialWithdrawals);
+  const fundedBalances = walletBalances.filter(
     (balance) =>
       Number(balance.availableBalance) > 0 ||
       Number(balance.lockedBalance) > 0 ||
@@ -33,6 +41,27 @@ export function DashboardWallet({
     params.set("modal", "add-money");
     params.delete("method");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  function openWithdraw() {
+    if (withdrawalMethods.length === 0) {
+      router.push("/payment-methods?action=add");
+      return;
+    }
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("modal", "withdraw");
+    params.delete("method");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  function handleWithdrawalSubmitted(withdrawal: Withdrawal) {
+    setWithdrawals((current) => [withdrawal, ...current]);
+    setWalletBalances((current) => current.map((balance) => balance.currency === withdrawal.asset ? {
+      ...balance,
+      availableBalance: (Number(balance.availableBalance) - Number(withdrawal.amount)).toFixed(8).replace(/\.?0+$/, ""),
+      lockedBalance: (Number(balance.lockedBalance) + Number(withdrawal.amount)).toFixed(8).replace(/\.?0+$/, ""),
+    } : balance));
+    router.refresh();
   }
 
   return (
@@ -63,7 +92,10 @@ export function DashboardWallet({
               No approved wallet balance yet. Add funds to create your first crypto wallet.
             </p>
           )}
-          <button className="relative mt-7 inline-flex min-h-13 items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)]" onClick={openAddMoney} type="button"><Plus size={18} weight="bold" />Add Money</button>
+          <div className="relative mt-7 flex flex-wrap gap-3">
+            <button className="inline-flex min-h-13 items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)]" onClick={openAddMoney} type="button"><Plus size={18} weight="bold" />Add Money</button>
+            <button className="inline-flex min-h-13 items-center gap-2 rounded-xl border border-white/18 bg-white/8 px-6 text-sm font-extrabold text-white transition hover:bg-white/14 disabled:cursor-not-allowed disabled:opacity-45" disabled={fundedBalances.length === 0} onClick={openWithdraw} type="button"><ArrowUp size={18} weight="bold" />Withdraw</button>
+          </div>
         </article>
 
         <article className="rounded-[1.7rem] border border-[var(--color-border)] bg-white p-7 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:p-8">
@@ -86,7 +118,9 @@ export function DashboardWallet({
       </section>
 
       <DepositHistory deposits={deposits} />
+      <WithdrawalHistory withdrawals={withdrawals} />
       <AddMoneyModal methods={methods} onSubmitted={(deposit) => setDeposits((current) => [deposit, ...current])} />
+      <WithdrawModal balances={walletBalances} methods={withdrawalMethods} onSubmitted={handleWithdrawalSubmitted} />
     </>
   );
 }

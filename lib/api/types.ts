@@ -110,7 +110,6 @@ export type ClientWalletPaymentMethod = {
   isDefault: boolean;
   label: string;
   network: string;
-  qrCodeUrl: string | null;
   updatedAt: string;
   walletAddress: string;
 };
@@ -142,7 +141,6 @@ export type Deposit = {
   methodCode: string;
   methodName: string;
   network: string;
-  paymentProofUrl: string | null;
   reviewNotes: string;
   reviewedAt: string | null;
   senderWalletAddress: string;
@@ -158,6 +156,21 @@ export type ClientBalance = {
   lockedBalance: string;
   totalDeposited: string;
   totalWithdrawn: string;
+};
+
+export type Withdrawal = {
+  amount: string;
+  asset: string;
+  createdAt: string;
+  destinationLabel: string;
+  destinationNetwork: string;
+  destinationWalletAddress: string;
+  id: string;
+  paymentMethodId: string;
+  reviewNotes: string;
+  reviewedAt: string | null;
+  status: "approved" | "pending" | "rejected";
+  updatedAt: string;
 };
 
 export type CurrencyConversion = {

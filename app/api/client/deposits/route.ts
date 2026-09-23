@@ -1,7 +1,6 @@
 import {
   authenticatedClientRequest,
   jsonProxyResponse,
-  streamAuthenticatedClientUpload,
 } from "@/lib/api/authenticated-proxy";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 
@@ -19,9 +18,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   return jsonProxyResponse(
-    await streamAuthenticatedClientUpload(
+    await authenticatedClientRequest(
       request,
       API_ENDPOINTS.backend.clientDeposits,
+      {
+        body: await request.text(),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      },
     ),
   );
 }

@@ -3,20 +3,14 @@
 import {
   Check,
   Copy,
-  ImageSquare,
   SpinnerGap,
-  Trash,
-  UploadSimple,
   WarningCircle,
 } from "@phosphor-icons/react";
-import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { WalletQrCode } from "@/components/deposits/wallet-qr-code";
 import type { Deposit, PaymentMethod } from "@/lib/api/types";
-import { submitDepositWithProof } from "@/services/deposit.service";
-
-const maximumPaymentProofBytes = 4 * 1024 * 1024;
+import { submitDeposit } from "@/services/deposit.service";
 
 type DepositForm = {
   amount: string;
@@ -50,17 +44,8 @@ export function CryptoDepositForm({
     amount: initialAmount,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentProof, setPaymentProof] = useState<File | null>(null);
-  const [paymentProofPreview, setPaymentProofPreview] = useState("");
-  const [uploadProgress, setUploadProgress] = useState(0);
   const asset = method.asset ?? "Crypto";
   const walletAddress = method.walletAddress ?? "";
-
-  useEffect(() => {
-    return () => {
-      if (paymentProofPreview) URL.revokeObjectURL(paymentProofPreview);
-    };
-  }, [paymentProofPreview]);
 
   function updateField(field: keyof DepositForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -77,30 +62,18 @@ export function CryptoDepositForm({
     event.preventDefault();
     setError("");
 
-    if (!paymentProof) {
-      setError("Upload a screenshot of your completed payment.");
-      return;
-    }
-
     setIsSubmitting(true);
-    setUploadProgress(0);
 
     try {
-      const deposit = await submitDepositWithProof({
-        onProgress: setUploadProgress,
-        paymentProof,
-        payload: {
-          amount: Number(form.amount),
-          notes: form.notes,
-          paymentMethodId: method.id,
-          senderWalletAddress: form.senderWalletAddress,
-          transactionHash: form.transactionHash,
-        },
+      const deposit = await submitDeposit({
+        amount: Number(form.amount),
+        notes: form.notes,
+        paymentMethodId: method.id,
+        senderWalletAddress: form.senderWalletAddress,
+        transactionHash: form.transactionHash,
       });
 
       setForm(initialForm);
-      setPaymentProof(null);
-      setPaymentProofPreview("");
       onSubmitted(deposit);
     } catch (requestError) {
       setError(
@@ -110,31 +83,7 @@ export function CryptoDepositForm({
       );
     } finally {
       setIsSubmitting(false);
-      setUploadProgress(0);
     }
-  }
-
-  function selectPaymentProof(file?: File) {
-    if (!file) return;
-
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setError("Select a PNG, JPEG, or WebP payment screenshot.");
-      return;
-    }
-
-    if (file.size > maximumPaymentProofBytes) {
-      setError("The payment screenshot must be 4 MB or smaller.");
-      return;
-    }
-
-    setPaymentProof(file);
-    setPaymentProofPreview(URL.createObjectURL(file));
-    setError("");
-  }
-
-  function removePaymentProof() {
-    setPaymentProof(null);
-    setPaymentProofPreview("");
   }
 
   return (
@@ -257,87 +206,6 @@ export function CryptoDepositForm({
           to the TradeUply receiving wallet.
         </p>
 
-        <div className="mt-4">
-          <p className="text-xs font-extrabold text-[var(--color-ink)]">
-            Payment screenshot
-          </p>
-          <p className="mt-1 text-[0.68rem] leading-5 font-medium text-[var(--color-text-muted)]">
-            Upload the confirmation screen showing the completed amount and
-            transaction.
-          </p>
-
-          {paymentProofPreview ? (
-            <div className="mt-3 flex items-center gap-4 rounded-2xl border border-[var(--color-brand)]/30 bg-[var(--color-brand-soft)] p-3">
-              <div className="relative size-20 shrink-0 overflow-hidden rounded-xl border border-white bg-white">
-                <Image
-                  alt="Selected payment screenshot"
-                  className="size-full object-cover"
-                  fill
-                  sizes="80px"
-                  src={paymentProofPreview}
-                  unoptimized
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-extrabold text-[var(--color-ink)]">
-                  {paymentProof?.name}
-                </p>
-                <p className="mt-1 text-[0.66rem] font-semibold text-[var(--color-text-muted)]">
-                  {paymentProof
-                    ? `${(paymentProof.size / 1024 / 1024).toFixed(2)} MB`
-                    : ""}
-                </p>
-                <div className="mt-2 flex gap-2">
-                  <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[0.65rem] font-extrabold text-[var(--color-brand-hover)]">
-                    <UploadSimple size={14} weight="bold" /> Replace
-                    <input
-                      accept="image/png,image/jpeg,image/webp"
-                      className="sr-only"
-                      disabled={isSubmitting}
-                      onChange={(event) => {
-                        selectPaymentProof(event.target.files?.[0]);
-                        event.target.value = "";
-                      }}
-                      type="file"
-                    />
-                  </label>
-                  <button
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[0.65rem] font-extrabold text-[#b74c39]"
-                    disabled={isSubmitting}
-                    onClick={removePaymentProof}
-                    type="button"
-                  >
-                    <Trash size={14} /> Remove
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <label className="mt-3 flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] bg-[#f8faf9] px-5 text-center transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]">
-              <span className="grid size-10 place-items-center rounded-xl bg-white text-[var(--color-brand-hover)] shadow-sm">
-                <ImageSquare size={21} weight="duotone" />
-              </span>
-              <span className="mt-3 text-xs font-extrabold text-[var(--color-ink)]">
-                Choose payment screenshot
-              </span>
-              <span className="mt-1 text-[0.65rem] font-semibold text-[var(--color-text-muted)]">
-                PNG, JPEG, or WebP · maximum 4 MB
-              </span>
-              <input
-                accept="image/png,image/jpeg,image/webp"
-                className="sr-only"
-                disabled={isSubmitting}
-                onChange={(event) => {
-                  selectPaymentProof(event.target.files?.[0]);
-                  event.target.value = "";
-                }}
-                required
-                type="file"
-              />
-            </label>
-          )}
-        </div>
-
         <label
           className="mt-4 block text-xs font-extrabold text-[var(--color-ink)]"
           htmlFor="deposit-notes"
@@ -361,41 +229,13 @@ export function CryptoDepositForm({
           </p>
         )}
 
-        {isSubmitting && (
-          <div className="mt-4" aria-live="polite">
-            <div className="flex items-center justify-between text-[0.68rem] font-bold text-[var(--color-text-muted)]">
-              <span>
-                {uploadProgress < 100
-                  ? `Uploading payment proof ${uploadProgress}%`
-                  : "Securing your submission…"}
-              </span>
-              <span>{uploadProgress}%</span>
-            </div>
-            <div
-              aria-label="Deposit submission progress"
-              aria-valuemax={100}
-              aria-valuemin={0}
-              aria-valuenow={uploadProgress}
-              className="mt-2 h-2 overflow-hidden rounded-full bg-[#dce8e2]"
-              role="progressbar"
-            >
-              <div
-                className="h-full rounded-full bg-[var(--color-brand)] transition-[width]"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
         <button
           className="mt-5 flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)] disabled:opacity-65"
           disabled={isSubmitting}
           type="submit"
         >
           {isSubmitting && <SpinnerGap className="animate-spin" size={18} />}
-          {isSubmitting
-            ? "Submitting for verification…"
-            : "Submit Deposit & Proof"}
+          {isSubmitting ? "Submitting for verification…" : "Submit Deposit"}
         </button>
       </form>
     </div>
