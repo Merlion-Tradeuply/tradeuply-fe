@@ -2,10 +2,12 @@
 
 import {
   ArrowRight,
+  CheckCircle,
   ClipboardText,
   EnvelopeSimple,
   Headset,
   ShieldWarning,
+  SpinnerGap,
   UserCircle,
   Wallet,
   WarningCircle,
@@ -13,6 +15,8 @@ import {
 import { useState, type FormEvent } from "react";
 
 import { supportEmail } from "@/data/company";
+import { ApiRequestError, postJson } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import {
   type ContactData,
   type ContactErrors,
@@ -36,26 +40,50 @@ const initialData: ContactData = {
 export function ContactExperience() {
   const [data, setData] = useState<ContactData>(initialData);
   const [errors, setErrors] = useState<ContactErrors>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [requestError, setRequestError] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
 
   function updateField<K extends keyof ContactData>(field: K, value: ContactData[K]) {
     setData((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
-    setSubmitted(false);
+    setRequestError("");
+    setStatus("idle");
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validateContactForm(data);
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
-      setSubmitted(false);
+      setStatus("idle");
       return;
     }
 
     setErrors({});
-    setSubmitted(true);
+    setRequestError("");
+    setStatus("submitting");
+
+    try {
+      await postJson<{ message: string; success: true }, ContactData>(
+        API_ENDPOINTS.client.contactEnquiry,
+        {
+          email: data.email.trim(),
+          fullName: data.fullName.trim(),
+          message: data.message.trim(),
+          subject: data.subject,
+        },
+      );
+      setData(initialData);
+      setStatus("success");
+    } catch (error) {
+      setRequestError(
+        error instanceof ApiRequestError
+          ? error.message
+          : "Your enquiry could not be sent. Please try again.",
+      );
+      setStatus("idle");
+    }
   }
 
   return (
@@ -179,20 +207,29 @@ export function ContactExperience() {
             )}
           </div>
 
-          {submitted && (
-            <div aria-live="polite" className="mt-6 flex items-start gap-3 rounded-2xl border border-[#d5a553]/30 bg-[#fff8e9] p-4 text-[#704d16]">
-              <WarningCircle aria-hidden="true" className="mt-0.5 shrink-0" size={21} weight="duotone" />
+          {status === "success" && (
+            <div aria-live="polite" className="mt-6 flex items-start gap-3 rounded-2xl border border-[var(--color-brand)]/25 bg-[var(--color-brand-soft)] p-4 text-[var(--color-brand-hover)]">
+              <CheckCircle aria-hidden="true" className="mt-0.5 shrink-0" size={21} weight="fill" />
               <p className="text-xs leading-5 font-semibold">
-                Your enquiry passed frontend validation, but no message was transmitted.
-                Secure support submission will be enabled after TradeUply’s first-party
-                support service is connected.
+                Your enquiry has been sent to the TradeUply support team. We will reply to the email address you provided.
               </p>
             </div>
           )}
 
-          <button className="mt-7 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(6,184,102,0.2)] transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)] sm:w-auto" type="submit">
-            Submit Enquiry
-            <ArrowRight aria-hidden="true" size={17} weight="bold" />
+          {requestError && (
+            <div aria-live="polite" className="mt-6 flex items-start gap-3 rounded-2xl border border-[#d5a553]/30 bg-[#fff8e9] p-4 text-[#704d16]">
+              <WarningCircle aria-hidden="true" className="mt-0.5 shrink-0" size={21} weight="duotone" />
+              <p className="text-xs leading-5 font-semibold">{requestError}</p>
+            </div>
+          )}
+
+          <button className="mt-7 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(6,184,102,0.2)] transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)] disabled:cursor-wait disabled:opacity-70 sm:w-auto" disabled={status === "submitting"} type="submit">
+            {status === "submitting" ? "Sending enquiry…" : "Submit Enquiry"}
+            {status === "submitting" ? (
+              <SpinnerGap aria-hidden="true" className="animate-spin" size={17} />
+            ) : (
+              <ArrowRight aria-hidden="true" size={17} weight="bold" />
+            )}
           </button>
         </form>
       </section>

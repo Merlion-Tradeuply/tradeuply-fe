@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
   backend: {
+    contactEnquiry: "/contact",
     clientLogin: "/client/login",
     clientPasswordForgot: "/client/password/forgot",
     clientPasswordReset: "/client/password/reset",
@@ -28,6 +29,7 @@ export const API_ENDPOINTS = {
     verifyOtp: "/client/otp/verify",
   },
   client: {
+    contactEnquiry: "/api/contact",
     clientLogin: "/api/client/login",
     clientPasswordForgot: "/api/client/password/forgot",
     clientPasswordReset: "/api/client/password/reset",
