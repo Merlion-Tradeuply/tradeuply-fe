@@ -24,5 +24,6 @@ export const config = {
     "/my-porfolio/:path*",
     "/investment-funds/:path*",
     "/payment-methods/:path*",
+    "/transactions/:path*",
   ],
 };

@@ -3,6 +3,7 @@
 import {
   Briefcase,
   ChartDonut,
+  Receipt,
   Wallet,
   SquaresFour,
 } from "@phosphor-icons/react";
@@ -21,6 +22,7 @@ const navigationItems = [
     icon: Briefcase,
     label: "Investment Funds",
   },
+  { href: "/transactions", icon: Receipt, label: "Transactions" },
   { href: "/payment-methods", icon: Wallet, label: "Payment Methods" },
 ] as const;
 

@@ -222,3 +222,55 @@ export type ClientInvestmentProfit = {
   walletCurrency: string;
   withdrawnAt: string | null;
 };
+
+export type InvestmentProfitWithdrawal = {
+  amount: string;
+  amountUsd: string;
+  currency: string;
+  exchangeRate: string;
+  id: string;
+  quoteExpiresAt: string;
+  rateQuotedAt: string;
+  rateSource: string;
+};
+
+export type ClientTransactionType =
+  | "deposit"
+  | "withdrawal"
+  | "adjustment"
+  | "investment"
+  | "capital_return"
+  | "profit_withdrawal";
+
+export type ClientTransaction = {
+  amount: string;
+  amountUsd: string | null;
+  balanceAfter: string;
+  balanceBefore: string;
+  createdAt: string;
+  currency: string;
+  description: string;
+  destination: string;
+  direction: "credit" | "debit";
+  exchangeRate: string | null;
+  id: string;
+  reference: string;
+  source: string;
+  type: ClientTransactionType;
+};
+
+export type ClientTransactionResult = {
+  currencies: string[];
+  pagination: {
+    limit: number;
+    page: number;
+    pages: number;
+    total: number;
+  };
+  summary: {
+    credits: number;
+    debits: number;
+    total: number;
+  };
+  transactions: ClientTransaction[];
+};

@@ -13,14 +13,23 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { formatUsd } from "@/data/investment-plans";
-import type { ClientInvestment } from "@/lib/api/types";
+import type {
+  ClientBalance,
+  ClientInvestment,
+  CurrencyConversion,
+} from "@/lib/api/types";
 import {
   getClientInvestment,
   transferClientInvestmentCapital,
+  withdrawClientInvestmentProfit,
 } from "@/services/client-investment.service";
+import {
+  getClientWalletBalances,
+  getCurrencyConversion,
+} from "@/services/currency.service";
 
 function formatCrypto(value: string | number, currency: string) {
   return `${new Intl.NumberFormat("en-US", {
@@ -81,6 +90,16 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
   const [investment, setInvestment] = useState<ClientInvestment | null>(null);
   const [error, setError] = useState("");
   const [isTransferring, setIsTransferring] = useState(false);
+  const [walletBalances, setWalletBalances] = useState<ClientBalance[]>([]);
+  const [selectedCurrency, setSelectedCurrency] = useState("");
+  const [conversion, setConversion] = useState<CurrencyConversion | null>(null);
+  const [withdrawalError, setWithdrawalError] = useState("");
+  const [withdrawalMessage, setWithdrawalMessage] = useState("");
+  const [isLoadingWallets, setIsLoadingWallets] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const withdrawalRequestId = useRef<string | null>(null);
+  const isWithdrawalOpen = searchParams.get("withdraw") === "profit";
   const isLoading = Boolean(
     selectedInvestmentId && investment?.id !== selectedInvestmentId && !error,
   );
@@ -114,8 +133,110 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
     const params = new URLSearchParams(searchParams.toString());
     if (investmentId) params.set("investment", investmentId);
     else params.delete("investment");
+    params.delete("withdraw");
+    params.delete("wallet");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
+  async function openProfitWithdrawal() {
+    if (!investment || Number(investment.profit.availableUsd) <= 0) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("withdraw", "profit");
+    params.delete("wallet");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setWalletBalances([]);
+    setSelectedCurrency("");
+    setConversion(null);
+    setWithdrawalError("");
+    setWithdrawalMessage("");
+    withdrawalRequestId.current = null;
+    setIsLoadingWallets(true);
+
+    try {
+      setWalletBalances(await getClientWalletBalances());
+    } catch (requestError) {
+      setWithdrawalError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Wallet balances could not be loaded.",
+      );
+    } finally {
+      setIsLoadingWallets(false);
+    }
+  }
+
+  function closeProfitWithdrawal() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("withdraw");
+    params.delete("wallet");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setSelectedCurrency("");
+    setConversion(null);
+    setWithdrawalError("");
+    setWithdrawalMessage("");
+    withdrawalRequestId.current = null;
+  }
+
+  async function chooseProfitWallet(balance: ClientBalance) {
+    if (!investment) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("withdraw", "profit");
+    params.set("wallet", balance.currency.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setSelectedCurrency(balance.currency);
+    setConversion(null);
+    setWithdrawalError("");
+    setWithdrawalMessage("");
+    setIsConverting(true);
+
+    try {
+      setConversion(
+        await getCurrencyConversion({
+          amount: Number(investment.profit.availableUsd),
+          from: "USD",
+          to: balance.currency,
+        }),
+      );
+    } catch (requestError) {
+      setWithdrawalError(
+        requestError instanceof Error
+          ? requestError.message
+          : "The live conversion rate could not be loaded.",
+      );
+    } finally {
+      setIsConverting(false);
+    }
+  }
+
+  async function confirmProfitWithdrawal() {
+    if (!investment || !selectedCurrency || !conversion) return;
+    setWithdrawalError("");
+    setIsWithdrawing(true);
+    if (!withdrawalRequestId.current) {
+      withdrawalRequestId.current = crypto.randomUUID();
+    }
+
+    try {
+      const result = await withdrawClientInvestmentProfit({
+        investmentId: investment.id,
+        requestId: withdrawalRequestId.current,
+        walletCurrency: selectedCurrency,
+      });
+      setInvestment(result.investment);
+      setWithdrawalMessage(
+        `${Number(result.withdrawal.amount).toFixed(8)} ${result.withdrawal.currency} was credited to your TradeUply wallet.`,
+      );
+      router.refresh();
+    } catch (requestError) {
+      setWithdrawalError(
+        requestError instanceof Error
+          ? requestError.message
+          : "The profit could not be withdrawn.",
+      );
+    } finally {
+      setIsWithdrawing(false);
+    }
   }
 
   async function transferCapital() {
@@ -471,12 +592,19 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
                     </div>
 
                     <button
-                      className="mt-4 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-[#e7edeb] px-4 text-xs font-extrabold text-[var(--color-text-muted)]"
-                      disabled
+                      className={`mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-xs font-extrabold transition ${
+                        Number(investment.profit.availableUsd) > 0
+                          ? "bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)]"
+                          : "cursor-not-allowed bg-[#e7edeb] text-[var(--color-text-muted)]"
+                      }`}
+                      disabled={Number(investment.profit.availableUsd) <= 0}
+                      onClick={() => void openProfitWithdrawal()}
                       type="button"
                     >
                       <Wallet size={17} weight="duotone" />
-                      Withdraw Profit · Coming soon
+                      {Number(investment.profit.availableUsd) > 0
+                        ? "Withdraw Profit"
+                        : "No profit available"}
                     </button>
                   </section>
 
@@ -529,6 +657,163 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
                 </div>
               </div>
             )}
+          </section>
+        </div>
+      )}
+
+      {isWithdrawalOpen && investment && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#041a36]/65 p-4 backdrop-blur-sm">
+          <section
+            aria-label="Withdraw investment profit"
+            aria-modal="true"
+            className="w-full max-w-xl overflow-hidden rounded-[1.5rem] bg-[#f4f8f7] shadow-[0_35px_100px_rgba(3,26,59,0.35)]"
+            role="dialog"
+          >
+            <header className="flex items-center justify-between border-b border-[var(--color-border)] bg-white px-5 py-4">
+              <div>
+                <p className="text-[0.55rem] font-extrabold tracking-[0.13em] text-[var(--color-brand-hover)] uppercase">
+                  Internal wallet transfer
+                </p>
+                <h2 className="mt-1 text-base font-extrabold text-[var(--color-ink)]">
+                  Withdraw available profit
+                </h2>
+              </div>
+              <button
+                aria-label="Close profit withdrawal"
+                className="grid size-10 place-items-center rounded-xl border border-[var(--color-border)] bg-white text-[var(--color-ink)]"
+                disabled={isWithdrawing}
+                onClick={closeProfitWithdrawal}
+                type="button"
+              >
+                <X size={19} weight="bold" />
+              </button>
+            </header>
+
+            <div className="max-h-[80vh] overflow-y-auto p-5">
+              <div className="rounded-[1.2rem] bg-[var(--color-ink)] p-5 text-white">
+                <p className="text-[0.58rem] font-extrabold tracking-[0.1em] text-white/55 uppercase">
+                  Available profit
+                </p>
+                <p className="mt-2 text-3xl font-extrabold">
+                  {formatUsd(Number(investment.profit.availableUsd))}
+                </p>
+                <p className="mt-2 text-xs font-semibold text-white/60">
+                  Choose a deposited asset below to credit its TradeUply wallet.
+                </p>
+              </div>
+
+              <div className="mt-5">
+                <p className="text-xs font-extrabold text-[var(--color-ink)]">
+                  Available wallets
+                </p>
+                <p className="mt-1 text-[0.65rem] font-medium text-[var(--color-text-muted)]">
+                  Only wallets previously funded through an approved deposit are shown.
+                </p>
+
+                {isLoadingWallets ? (
+                  <div className="mt-3 flex min-h-24 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] bg-white text-xs font-bold text-[var(--color-text-muted)]">
+                    <SpinnerGap className="animate-spin" size={18} /> Loading wallets
+                  </div>
+                ) : walletBalances.filter(
+                    (balance) => Number(balance.totalDeposited) > 0,
+                  ).length === 0 ? (
+                  <div className="mt-3 rounded-xl border border-dashed border-[var(--color-border)] bg-white p-5 text-center text-xs font-bold text-[var(--color-text-muted)]">
+                    No deposited crypto wallet is available.
+                  </div>
+                ) : (
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {walletBalances
+                      .filter((balance) => Number(balance.totalDeposited) > 0)
+                      .map((balance) => (
+                        <button
+                          className={`rounded-xl border p-3 text-left transition ${
+                            selectedCurrency === balance.currency
+                              ? "border-[var(--color-brand)] bg-[var(--color-brand-soft)]"
+                              : "border-[var(--color-border)] bg-white hover:border-[var(--color-brand)]"
+                          }`}
+                          key={balance.currency}
+                          onClick={() => void chooseProfitWallet(balance)}
+                          type="button"
+                        >
+                          <span className="block text-xs font-extrabold text-[var(--color-ink)]">
+                            {balance.currency} wallet
+                          </span>
+                          <span className="mt-1 block text-[0.62rem] font-semibold text-[var(--color-text-muted)]">
+                            {formatCrypto(balance.availableBalance, balance.currency)} available
+                          </span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              {isConverting && (
+                <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-white p-4 text-xs font-bold text-[var(--color-text-muted)]">
+                  <SpinnerGap className="animate-spin" size={17} /> Loading live conversion
+                </div>
+              )}
+
+              {conversion && selectedCurrency && (
+                <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-white p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-xs font-bold text-[var(--color-text-muted)]">
+                      Profit amount
+                    </span>
+                    <strong className="text-sm text-[var(--color-ink)]">
+                      {formatUsd(Number(investment.profit.availableUsd))}
+                    </strong>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-4 border-t border-[var(--color-border)] pt-3">
+                    <span className="text-xs font-bold text-[var(--color-text-muted)]">
+                      Wallet credit
+                    </span>
+                    <strong className="text-sm text-[var(--color-brand-hover)]">
+                      {conversion.convertedAmount.toFixed(8)} {selectedCurrency}
+                    </strong>
+                  </div>
+                  <p className="mt-3 text-[0.58rem] leading-4 font-semibold text-[var(--color-text-muted)]">
+                    Live rate: 1 USD = {conversion.rate.toFixed(8)} {selectedCurrency}.
+                    The final rate is refreshed and stored when you withdraw.
+                  </p>
+                </div>
+              )}
+
+              {withdrawalError && (
+                <p className="mt-4 rounded-xl bg-red-50 p-3 text-xs font-bold text-[var(--color-danger)]">
+                  {withdrawalError}
+                </p>
+              )}
+              {withdrawalMessage && (
+                <div className="mt-4 flex gap-2 rounded-xl bg-emerald-50 p-4 text-xs font-bold text-emerald-800">
+                  <CheckCircle className="shrink-0" size={18} weight="fill" />
+                  {withdrawalMessage}
+                </div>
+              )}
+
+              <button
+                className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)] disabled:cursor-not-allowed disabled:opacity-55"
+                disabled={
+                  !conversion ||
+                  !selectedCurrency ||
+                  isWithdrawing ||
+                  Boolean(withdrawalMessage)
+                }
+                onClick={() => void confirmProfitWithdrawal()}
+                type="button"
+              >
+                {isWithdrawing ? (
+                  <SpinnerGap className="animate-spin" size={18} />
+                ) : (
+                  <Wallet size={18} weight="duotone" />
+                )}
+                {isWithdrawing
+                  ? "Withdrawing profit..."
+                  : "Withdraw to TradeUply wallet"}
+              </button>
+              <p className="mt-3 text-center text-[0.58rem] font-semibold text-[var(--color-text-muted)]">
+                This does not send funds to an external personal-wallet address.
+              </p>
+            </div>
           </section>
         </div>
       )}

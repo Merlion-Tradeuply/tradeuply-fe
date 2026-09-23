@@ -1,5 +1,8 @@
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import type { ClientInvestment } from "@/lib/api/types";
+import type {
+  ClientInvestment,
+  InvestmentProfitWithdrawal,
+} from "@/lib/api/types";
 
 type InvestmentResponse = {
   data?: { investment: ClientInvestment };
@@ -48,4 +51,35 @@ export async function transferClientInvestmentCapital(investmentId: string) {
     throw new Error(result.error?.message ?? "The capital could not be transferred.");
   }
   return result.data.investment;
+}
+
+export async function withdrawClientInvestmentProfit({
+  investmentId,
+  requestId,
+  walletCurrency,
+}: {
+  investmentId: string;
+  requestId: string;
+  walletCurrency: string;
+}) {
+  const response = await fetch(
+    API_ENDPOINTS.client.clientInvestmentProfitWithdrawal(investmentId),
+    {
+      body: JSON.stringify({ requestId, walletCurrency }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    },
+  );
+  const result = (await response.json()) as {
+    data?: {
+      investment: ClientInvestment;
+      withdrawal: InvestmentProfitWithdrawal;
+    };
+    error?: { message?: string };
+  };
+
+  if (!response.ok || !result.data) {
+    throw new Error(result.error?.message ?? "The profit could not be withdrawn.");
+  }
+  return result.data;
 }
