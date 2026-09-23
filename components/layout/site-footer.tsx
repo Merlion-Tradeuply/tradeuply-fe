@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
-import { companyOffices, officeAddressNotice, supportEmail } from "@/data/company";
+import { companyOffices, supportEmail } from "@/data/company";
 
 const footerNavigation = [
   {
@@ -170,9 +170,6 @@ export function SiteFooter() {
               </article>
             ))}
           </div>
-          <p className="mt-5 text-xs leading-5 font-semibold text-[#e1bd74]">
-            Preview notice: {officeAddressNotice}
-          </p>
         </section>
 
         <div className="flex flex-col gap-4 border-t border-white/10 pt-7 text-xs font-semibold text-white/38 sm:flex-row sm:items-center sm:justify-between">
