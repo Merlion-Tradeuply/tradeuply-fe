@@ -57,7 +57,9 @@ function formatDateTime(value: string) {
 
 function getProfitSchedule(investment: ClientInvestment) {
   const entriesByDay = new Map(
-    (investment.profit.entries ?? []).map((entry) => [entry.dayNumber, entry]),
+    (investment.profit.entries ?? [])
+      .filter((entry) => entry.kind !== "bonus")
+      .map((entry) => [entry.dayNumber, entry]),
   );
   const startsAt = new Date(investment.startsAt).getTime();
 
@@ -590,6 +592,53 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
                           </div>
                         ))}
                     </div>
+
+                    {(investment.profit.entries ?? []).some(
+                      (entry) => entry.kind === "bonus",
+                    ) && (
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                        <p className="text-[0.62rem] font-extrabold text-emerald-800">
+                          Bonus credits
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {(investment.profit.entries ?? [])
+                            .filter((entry) => entry.kind === "bonus")
+                            .map((entry) => (
+                              <div
+                                className="flex items-start justify-between gap-3 rounded-lg bg-white/80 p-2.5"
+                                key={entry.id}
+                              >
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle
+                                      className="text-emerald-600"
+                                      size={17}
+                                      weight="fill"
+                                    />
+                                    <p className="text-[0.66rem] font-extrabold text-[var(--color-ink)]">
+                                      Portfolio bonus
+                                    </p>
+                                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[0.5rem] font-extrabold text-emerald-700 uppercase">
+                                      {entry.status}
+                                    </span>
+                                  </div>
+                                  <p className="mt-1 text-[0.56rem] font-semibold text-[var(--color-text-muted)]">
+                                    {formatDateTime(entry.creditDate)}
+                                  </p>
+                                  {entry.note && (
+                                    <p className="mt-1 text-[0.58rem] font-semibold text-[var(--color-text-muted)]">
+                                      {entry.note}
+                                    </p>
+                                  )}
+                                </div>
+                                <strong className="shrink-0 text-[0.68rem] text-emerald-700">
+                                  +{formatUsd(Number(entry.amountUsd))}
+                                </strong>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
 
                     <button
                       className={`mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-xs font-extrabold transition ${

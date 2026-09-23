@@ -15,6 +15,7 @@ import { useState, type FormEvent } from "react";
 import { postJson, ApiRequestError } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type { ClientLoginResponse } from "@/lib/api/types";
+import { ForgotPasswordModal } from "@/components/auth/forgot-password-modal";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -32,6 +33,7 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
   const [apiError, setApiError] = useState("");
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -129,9 +131,14 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
         </div>
 
         <div className="mt-5">
-          <label className="text-sm font-extrabold text-[var(--color-ink)]" htmlFor="login-password">
-            Password
-          </label>
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-sm font-extrabold text-[var(--color-ink)]" htmlFor="login-password">
+              Password
+            </label>
+            <button className="text-xs font-extrabold text-[var(--color-brand-hover)] hover:underline" onClick={() => setIsForgotPasswordOpen(true)} type="button">
+              Forgot password?
+            </button>
+          </div>
           <div className="relative mt-2.5">
             <input
               aria-describedby={errors.password ? "login-password-error" : undefined}
@@ -203,6 +210,9 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
           </Link>
         </p>
       </form>
+      {isForgotPasswordOpen && (
+        <ForgotPasswordModal onClose={() => setIsForgotPasswordOpen(false)} />
+      )}
     </section>
   );
 }

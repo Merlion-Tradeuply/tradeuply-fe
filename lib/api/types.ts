@@ -237,6 +237,8 @@ export type ClientInvestmentProfit = {
   creditDate: string;
   dayNumber: number;
   id: string;
+  kind: "daily" | "bonus";
+  note: string;
   status: "available" | "withdrawn";
   walletAmount: string;
   walletCurrency: string;
