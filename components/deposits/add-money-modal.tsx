@@ -1,17 +1,32 @@
 "use client";
 
-import { ArrowLeft, CheckCircle, X } from "@phosphor-icons/react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  ClockCountdown,
+  X,
+} from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { PaymentMethodGrid } from "@/components/deposits/payment-method-grid";
-import { UsdtDepositForm } from "@/components/deposits/usdt-deposit-form";
+import { CryptoDepositForm } from "@/components/deposits/crypto-deposit-form";
 import type { Deposit, PaymentMethod } from "@/lib/api/types";
 
+const modalDurationSeconds = 12 * 60;
+
+function formatCountdown(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
 export function AddMoneyModal({
+  completionButtonLabel = "View dashboard",
   methods,
   onSubmitted,
 }: {
+  completionButtonLabel?: string;
   methods: PaymentMethod[];
   onSubmitted: (deposit: Deposit) => void;
 }) {
@@ -20,7 +35,10 @@ export function AddMoneyModal({
   const searchParams = useSearchParams();
   const isOpen = searchParams.get("modal") === "add-money";
   const selectedCode = searchParams.get("method");
+  const initialAmount = searchParams.get("amount") ?? "";
+  const referenceUsdAmount = searchParams.get("usdAmount");
   const [submittedDeposit, setSubmittedDeposit] = useState<Deposit | null>(null);
+  const [secondsRemaining, setSecondsRemaining] = useState(modalDurationSeconds);
   const selectedMethod = useMemo(
     () => methods.find((method) => method.code === selectedCode) ?? null,
     [methods, selectedCode],
@@ -33,6 +51,31 @@ export function AddMoneyModal({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const expiresAt = Date.now() + modalDurationSeconds * 1000;
+    const updateCountdown = () => {
+      const nextSeconds = Math.max(
+        0,
+        Math.ceil((expiresAt - Date.now()) / 1000),
+      );
+      setSecondsRemaining(nextSeconds);
+
+      if (nextSeconds === 0) {
+        setSubmittedDeposit(null);
+        router.replace(pathname, { scroll: false });
+      }
+    };
+    const initialUpdate = window.setTimeout(updateCountdown, 0);
+    const interval = window.setInterval(updateCountdown, 1000);
+
+    return () => {
+      window.clearTimeout(initialUpdate);
+      window.clearInterval(interval);
+    };
+  }, [isOpen, pathname, router]);
+
   function updateUrl(methodCode?: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("modal", "add-money");
@@ -43,6 +86,7 @@ export function AddMoneyModal({
 
   function closeModal() {
     setSubmittedDeposit(null);
+    setSecondsRemaining(modalDurationSeconds);
     router.replace(pathname, { scroll: false });
   }
 
@@ -62,7 +106,21 @@ export function AddMoneyModal({
               <h2 className="mt-1 text-lg font-extrabold text-[var(--color-ink)]">{selectedMethod ? selectedMethod.name : "Choose a payment method"}</h2>
             </div>
           </div>
-          <button aria-label="Close" className="grid size-10 place-items-center rounded-xl border border-[var(--color-border)] bg-white" onClick={closeModal} type="button"><X size={19} weight="bold" /></button>
+          <div className="flex items-center gap-2">
+            <div
+              aria-live="polite"
+              className={`flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-extrabold ${
+                secondsRemaining <= 120
+                  ? "border-amber-300 bg-amber-50 text-amber-800"
+                  : "border-[var(--color-border)] bg-[#f8faf9] text-[var(--color-ink)]"
+              }`}
+              title="This payment window closes automatically when the timer expires."
+            >
+              <ClockCountdown size={17} weight="duotone" />
+              <span>{formatCountdown(secondsRemaining)}</span>
+            </div>
+            <button aria-label="Close" className="grid size-10 place-items-center rounded-xl border border-[var(--color-border)] bg-white" onClick={closeModal} type="button"><X size={19} weight="bold" /></button>
+          </div>
         </header>
 
         <div className="p-5 sm:p-8">
@@ -70,19 +128,23 @@ export function AddMoneyModal({
             <div className="mx-auto max-w-xl py-10 text-center">
               <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]"><CheckCircle size={34} weight="duotone" /></span>
               <h3 className="mt-6 text-2xl font-extrabold text-[var(--color-ink)]">Deposit submitted</h3>
-              <p className="mt-3 text-sm leading-7 font-medium text-[var(--color-text-muted)]">Your {submittedDeposit.amount} USDT transaction is pending administrator verification. Your balance will update only after approval.</p>
-              <button className="mt-7 rounded-xl bg-[var(--color-brand)] px-7 py-3 text-sm font-extrabold text-white" onClick={closeModal} type="button">View dashboard</button>
+              <p className="mt-3 text-sm leading-7 font-medium text-[var(--color-text-muted)]">Your {submittedDeposit.amount} {submittedDeposit.asset} transaction is pending administrator verification. Your {submittedDeposit.asset} wallet balance will update only after approval.</p>
+              <button className="mt-7 rounded-xl bg-[var(--color-brand)] px-7 py-3 text-sm font-extrabold text-white" onClick={closeModal} type="button">{completionButtonLabel}</button>
             </div>
-          ) : selectedMethod?.code === "usdt" &&
+          ) : selectedMethod?.category === "crypto" &&
+            selectedMethod.asset &&
             selectedMethod.walletAddress &&
             selectedMethod.network &&
             selectedMethod.qrCodeUrl ? (
-            <UsdtDepositForm
+            <CryptoDepositForm
+              initialAmount={initialAmount}
+              key={`${selectedMethod.id}:${initialAmount}`}
               method={selectedMethod}
               onSubmitted={(deposit) => {
                 setSubmittedDeposit(deposit);
                 onSubmitted(deposit);
               }}
+              referenceUsdAmount={referenceUsdAmount}
             />
           ) : (
             <PaymentMethodGrid methods={methods} onSelect={(method) => updateUrl(method.code)} selectedCode={selectedCode} />

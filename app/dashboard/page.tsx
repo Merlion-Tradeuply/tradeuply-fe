@@ -8,9 +8,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { LogoutButton } from "@/components/auth/logout-button";
+import { ClientDashboardShell } from "@/components/dashboard/client-dashboard-shell";
 import { DashboardWallet } from "@/components/deposits/dashboard-wallet";
-import { Container } from "@/components/ui/container";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { requestBackend } from "@/lib/api/proxy";
 import type {
@@ -66,7 +65,7 @@ async function getWalletData() {
   }
 
   return {
-    balance: (JSON.parse(balanceResult.body) as { data: { balance: ClientBalance } }).data.balance,
+    balances: (JSON.parse(balanceResult.body) as { data: { balances: ClientBalance[] } }).data.balances,
     deposits: (JSON.parse(depositResult.body) as { data: { deposits: Deposit[] } }).data.deposits,
     methods: (JSON.parse(methodResult.body) as { data: { methods: PaymentMethod[] } }).data.methods,
   };
@@ -76,27 +75,12 @@ export default async function DashboardPage() {
   const [client, walletData] = await Promise.all([getClient(), getWalletData()]);
 
   return (
-    <main className="mt-[7.5rem] min-h-screen bg-[#f4f8f6] pb-20 sm:mt-[8.5rem] lg:mt-36">
-      <Container className="pt-10 sm:pt-14">
-        <section className="relative overflow-hidden rounded-[2rem] bg-[var(--color-ink)] p-7 text-white shadow-[0_30px_80px_rgba(3,26,59,0.16)] sm:p-10 lg:p-12">
-          <div aria-hidden="true" className="absolute -top-32 right-0 size-80 rounded-full bg-[var(--color-brand)]/25 blur-3xl" />
-          <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-            <div>
-              <p className="text-xs font-extrabold tracking-[0.2em] text-[#67e4a7] uppercase">
-                Client Dashboard
-              </p>
-              <h1 className="mt-4 text-[clamp(2.1rem,5vw,4rem)] leading-[1.05] font-extrabold tracking-[-0.05em]">
-                Welcome, {client.firstName}.
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 font-medium text-white/65 sm:text-base">
-                Review your USDT balance, submit a deposit for verification, and follow every status change from one secure workspace.
-              </p>
-            </div>
-            <LogoutButton />
-          </div>
-        </section>
+    <ClientDashboardShell
+      description={`Welcome, ${client.firstName}. Review your wallets and funding activity.`}
+      title="Dashboard"
+    >
 
-        <Suspense fallback={<div className="mt-7 h-64 animate-pulse rounded-[1.7rem] bg-white" />}>
+        <Suspense fallback={<div className="h-64 animate-pulse rounded-[1.7rem] bg-white" />}>
           <DashboardWallet {...walletData} />
         </Suspense>
 
@@ -124,10 +108,9 @@ export default async function DashboardPage() {
           </span>
           <div>
             <h2 className="font-extrabold text-[var(--color-ink)]">Verified funding workflow</h2>
-            <p className="mt-1 text-sm leading-6 font-medium text-[var(--color-text-muted)]">Submitted USDT transfers remain pending until an authorized administrator verifies the blockchain transaction.</p>
+            <p className="mt-1 text-sm leading-6 font-medium text-[var(--color-text-muted)]">Submitted crypto transfers remain pending until an authorized administrator verifies the blockchain transaction ID and payment evidence.</p>
           </div>
         </section>
-      </Container>
-    </main>
+    </ClientDashboardShell>
   );
 }

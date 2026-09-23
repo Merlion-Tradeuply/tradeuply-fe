@@ -9,11 +9,11 @@ import { DepositHistory } from "@/components/deposits/deposit-history";
 import type { ClientBalance, Deposit, PaymentMethod } from "@/lib/api/types";
 
 export function DashboardWallet({
-  balance,
+  balances,
   deposits: initialDeposits,
   methods,
 }: {
-  balance: ClientBalance;
+  balances: ClientBalance[];
   deposits: Deposit[];
   methods: PaymentMethod[];
 }) {
@@ -21,6 +21,12 @@ export function DashboardWallet({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deposits, setDeposits] = useState(initialDeposits);
+  const fundedBalances = balances.filter(
+    (balance) =>
+      Number(balance.availableBalance) > 0 ||
+      Number(balance.lockedBalance) > 0 ||
+      Number(balance.totalDeposited) > 0,
+  );
 
   function openAddMoney() {
     const params = new URLSearchParams(searchParams.toString());
@@ -31,24 +37,50 @@ export function DashboardWallet({
 
   return (
     <>
-      <section className="mt-7 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+      <section className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
         <article className="relative overflow-hidden rounded-[1.7rem] bg-[var(--color-ink)] p-7 text-white shadow-[0_24px_65px_rgba(3,26,59,0.14)] sm:p-8">
           <div aria-hidden="true" className="absolute -top-20 -right-14 size-60 rounded-full bg-[var(--color-brand)]/22 blur-3xl" />
           <div className="relative flex items-start justify-between gap-5">
             <div>
-              <p className="text-xs font-extrabold tracking-[0.16em] text-[#67e4a7] uppercase">Available balance</p>
-              <p className="mt-4 text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold tracking-[-0.05em]">{balance.availableBalance} <span className="text-lg text-white/55">USDT</span></p>
-              <p className="mt-2 text-xs font-semibold text-white/48">Approved funds available in your TradeUply account</p>
+              <p className="text-xs font-extrabold tracking-[0.16em] text-[#67e4a7] uppercase">Wallet balances</p>
+              <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.035em]">Approved crypto funds</h2>
+              <p className="mt-2 text-xs font-semibold text-white/48">Each cryptocurrency is tracked in its own wallet balance.</p>
             </div>
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/8 text-[#67e4a7]"><Wallet size={26} weight="duotone" /></span>
           </div>
+          {fundedBalances.length > 0 ? (
+            <div className="relative mt-7 grid gap-3 sm:grid-cols-2">
+              {fundedBalances.map((balance) => (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.065] p-4" key={balance.currency}>
+                  <p className="text-[0.65rem] font-extrabold tracking-[0.12em] text-white/45 uppercase">{balance.currency}</p>
+                  <p className="mt-2 text-2xl font-extrabold tracking-[-0.035em]">{balance.availableBalance}</p>
+                  <p className="mt-1 text-[0.65rem] font-semibold text-white/42">Available balance</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="relative mt-7 rounded-2xl border border-white/10 bg-white/[0.055] p-5 text-sm font-semibold text-white/62">
+              No approved wallet balance yet. Add funds to create your first crypto wallet.
+            </p>
+          )}
           <button className="relative mt-7 inline-flex min-h-13 items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)]" onClick={openAddMoney} type="button"><Plus size={18} weight="bold" />Add Money</button>
         </article>
 
         <article className="rounded-[1.7rem] border border-[var(--color-border)] bg-white p-7 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:p-8">
           <span className="grid size-11 place-items-center rounded-xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]"><ArrowDown size={23} weight="duotone" /></span>
-          <p className="mt-6 text-xs font-extrabold tracking-[0.14em] text-[var(--color-text-muted)] uppercase">Total approved deposits</p>
-          <p className="mt-2 text-2xl font-extrabold text-[var(--color-ink)]">{balance.totalDeposited} USDT</p>
+          <p className="mt-6 text-xs font-extrabold tracking-[0.14em] text-[var(--color-text-muted)] uppercase">Approved deposits by asset</p>
+          {fundedBalances.length > 0 ? (
+            <dl className="mt-4 grid gap-3">
+              {fundedBalances.map((balance) => (
+                <div className="flex items-center justify-between rounded-xl bg-[#f5f8f7] px-4 py-3" key={balance.currency}>
+                  <dt className="text-xs font-extrabold text-[var(--color-text-muted)]">{balance.currency}</dt>
+                  <dd className="text-sm font-extrabold text-[var(--color-ink)]">{balance.totalDeposited}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="mt-4 text-sm font-extrabold text-[var(--color-ink)]">No approved deposits</p>
+          )}
           <p className="mt-4 text-xs leading-5 font-medium text-[var(--color-text-muted)]">Pending submissions are not included until an administrator verifies them.</p>
         </article>
       </section>

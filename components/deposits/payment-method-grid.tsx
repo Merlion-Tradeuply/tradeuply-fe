@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bank,
   CreditCard,
   CurrencyBtc,
   DeviceMobile,
@@ -19,7 +18,6 @@ const icons = {
   "debit-card": CreditCard,
   "google-pay": Wallet,
   "upi-qr": QrCode,
-  usdt: Bank,
 } as const;
 
 export function PaymentMethodGrid({
@@ -31,9 +29,11 @@ export function PaymentMethodGrid({
   onSelect: (method: PaymentMethod) => void;
   selectedCode: string | null;
 }) {
+  const cryptoMethods = methods.filter((method) => method.category === "crypto");
+
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {methods.map((method) => {
+      {cryptoMethods.map((method) => {
         const Icon = icons[method.code as keyof typeof icons] ?? Wallet;
         const isAvailable =
           method.status === "active" &&
@@ -65,7 +65,7 @@ export function PaymentMethodGrid({
               <span className="block text-sm font-extrabold text-[var(--color-ink)]">{method.name}</span>
               <span className="mt-1 block text-[0.68rem] font-bold text-[var(--color-text-muted)]">
                 {isAvailable
-                  ? `${method.network} · Available`
+                  ? `${method.asset} · ${method.network} · Available`
                   : method.status === "active"
                     ? "Configuration required"
                     : "Coming soon"}

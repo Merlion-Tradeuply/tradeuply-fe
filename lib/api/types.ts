@@ -122,6 +122,7 @@ export type DepositActivity = {
 export type Deposit = {
   activities: DepositActivity[];
   amount: string;
+  asset: string;
   clientNotes: string;
   createdAt: string;
   destinationWalletAddress: string;
@@ -140,9 +141,45 @@ export type Deposit = {
 
 export type ClientBalance = {
   availableBalance: string;
-  currency: "USDT";
+  currency: string;
   lastTransactionAt: string | null;
   lockedBalance: string;
   totalDeposited: string;
   totalWithdrawn: string;
+};
+
+export type CurrencyConversion = {
+  amount: number;
+  convertedAmount: number;
+  from: { code: string; name: string; type: string };
+  lastUpdated: string;
+  quoteExpiresAt: string;
+  rate: number;
+  source: string;
+  to: { code: string; name: string; type: string };
+};
+
+export type ClientInvestment = {
+  amountUsd: string;
+  createdAt: string;
+  exchangeRate: string;
+  id: string;
+  maturesAt: string;
+  plan: {
+    allocation: string;
+    dailyObjective: number;
+    horizonDays: number;
+    name: string;
+    risk: string;
+    slug: string;
+  };
+  projectedProfitUsd: string;
+  projectedTotalUsd: string;
+  quoteExpiresAt: string;
+  rateQuotedAt: string;
+  rateSource: string;
+  startsAt: string;
+  status: "active" | "completed" | "cancelled";
+  walletAmount: string;
+  walletCurrency: string;
 };

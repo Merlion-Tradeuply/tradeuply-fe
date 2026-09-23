@@ -53,7 +53,7 @@ export function DepositHistory({ deposits }: { deposits: Deposit[] }) {
               type="button"
             >
               <span className="min-w-0">
-                <span className="block text-sm font-extrabold text-[var(--color-ink)]">{deposit.amount} USDT</span>
+                <span className="block text-sm font-extrabold text-[var(--color-ink)]">{deposit.amount} {deposit.asset}</span>
                 <span className="mt-1 block truncate text-xs font-semibold text-[var(--color-text-muted)]">{deposit.transactionHash}</span>
               </span>
               <span className="flex shrink-0 items-center gap-3">
@@ -71,7 +71,7 @@ export function DepositHistory({ deposits }: { deposits: Deposit[] }) {
           <section className="relative max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-t-[2rem] bg-white p-6 shadow-2xl sm:rounded-[2rem] sm:p-8">
             <button aria-label="Close" className="absolute top-5 right-5 grid size-10 place-items-center rounded-xl bg-slate-100" onClick={() => setSelected(null)} type="button"><X size={19} weight="bold" /></button>
             <p className="text-xs font-extrabold tracking-[0.16em] text-[var(--color-brand-hover)] uppercase">Transaction activity</p>
-            <h3 className="mt-2 text-xl font-extrabold text-[var(--color-ink)]">{selected.amount} USDT</h3>
+            <h3 className="mt-2 text-xl font-extrabold text-[var(--color-ink)]">{selected.amount} {selected.asset}</h3>
             <p className="mt-2 break-all text-xs font-semibold text-[var(--color-text-muted)]">{selected.transactionHash}</p>
             <ol className="mt-7 space-y-5 border-l border-[var(--color-border)] pl-6">
               {selected.activities.map((activity) => (
