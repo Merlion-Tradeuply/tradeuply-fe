@@ -23,5 +23,6 @@ export const config = {
     "/dashboard/:path*",
     "/my-porfolio/:path*",
     "/investment-funds/:path*",
+    "/payment-methods/:path*",
   ],
 };

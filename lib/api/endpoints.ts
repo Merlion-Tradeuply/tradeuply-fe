@@ -5,9 +5,19 @@ export const API_ENDPOINTS = {
     clientMe: "/client/me",
     clientBalance: "/client/balance",
     clientInvestments: "/client/investments",
+    clientInvestment: (investmentId: string) =>
+      `/client/investments/${investmentId}`,
+    clientInvestmentCapitalTransfer: (investmentId: string) =>
+      `/client/investments/${investmentId}/capital-transfer`,
     currencyConversion: "/currency/convert",
     clientDeposits: "/client/deposits",
     clientPaymentMethods: "/client/payment-methods",
+    clientWallets: "/client/wallets",
+    clientWallet: (methodId: string) => `/client/wallets/${methodId}`,
+    clientWalletQrSignature: (methodId: string) =>
+      `/client/wallets/${methodId}/qr-code/signature`,
+    clientWalletQrComplete: (methodId: string) =>
+      `/client/wallets/${methodId}/qr-code/complete`,
     publicInvestmentPlans: "/investment-plans/public",
     clientRegistration: "/client/signup",
     clientTokenRefresh: "/client/token/refresh",
@@ -21,9 +31,19 @@ export const API_ENDPOINTS = {
     clientSession: "/api/client/session",
     clientBalance: "/api/client/balance",
     clientInvestments: "/api/client/investments",
+    clientInvestment: (investmentId: string) =>
+      `/api/client/investments/${investmentId}`,
+    clientInvestmentCapitalTransfer: (investmentId: string) =>
+      `/api/client/investments/${investmentId}/capital-transfer`,
     currencyConversion: "/api/client/currency/convert",
     clientDeposits: "/api/client/deposits",
     clientPaymentMethods: "/api/client/payment-methods",
+    clientWallets: "/api/client/wallets",
+    clientWallet: (methodId: string) => `/api/client/wallets/${methodId}`,
+    clientWalletQrSignature: (methodId: string) =>
+      `/api/client/wallets/${methodId}/qr-code/signature`,
+    clientWalletQrComplete: (methodId: string) =>
+      `/api/client/wallets/${methodId}/qr-code/complete`,
     publicInvestmentPlans: "/api/investment-plans",
     clientTokenRefresh: "/api/client/token/refresh",
     resendOtp: "/api/client/otp/resend",

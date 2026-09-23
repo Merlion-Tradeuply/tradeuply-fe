@@ -24,3 +24,28 @@ export async function createClientInvestment(payload: {
   }
   return result.data.investment;
 }
+
+export async function getClientInvestment(investmentId: string) {
+  const response = await fetch(API_ENDPOINTS.client.clientInvestment(investmentId), {
+    cache: "no-store",
+  });
+  const result = (await response.json()) as InvestmentResponse;
+
+  if (!response.ok || !result.data?.investment) {
+    throw new Error(result.error?.message ?? "The investment details could not be loaded.");
+  }
+  return result.data.investment;
+}
+
+export async function transferClientInvestmentCapital(investmentId: string) {
+  const response = await fetch(
+    API_ENDPOINTS.client.clientInvestmentCapitalTransfer(investmentId),
+    { method: "POST" },
+  );
+  const result = (await response.json()) as InvestmentResponse;
+
+  if (!response.ok || !result.data?.investment) {
+    throw new Error(result.error?.message ?? "The capital could not be transferred.");
+  }
+  return result.data.investment;
+}

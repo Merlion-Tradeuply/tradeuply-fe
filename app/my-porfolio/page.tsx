@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { ClientDashboardShell } from "@/components/dashboard/client-dashboard-shell";
-import { PortfolioGrid } from "@/components/dashboard/portfolio-grid";
+import { PortfolioModule } from "@/components/dashboard/portfolio-module";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { requestBackend } from "@/lib/api/proxy";
 import type { ClientInvestment } from "@/lib/api/types";
@@ -42,7 +42,7 @@ export default async function MyPortfolioPage() {
       description="Track each active investment, its funding wallet, term, and projected value."
       title="My Portfolio"
     >
-      <PortfolioGrid investments={investments} />
+      <PortfolioModule investments={investments} />
     </ClientDashboardShell>
   );
 }

@@ -103,6 +103,18 @@ export type PaymentMethod = {
   walletAddress?: string | null;
 };
 
+export type ClientWalletPaymentMethod = {
+  asset: string;
+  createdAt: string;
+  id: string;
+  isDefault: boolean;
+  label: string;
+  network: string;
+  qrCodeUrl: string | null;
+  updatedAt: string;
+  walletAddress: string;
+};
+
 export type DepositActivity = {
   actorLabel: string;
   actorType: "client" | "internal" | "system";
@@ -161,7 +173,10 @@ export type CurrencyConversion = {
 
 export type ClientInvestment = {
   amountUsd: string;
+  capitalReturnedAt: string | null;
   createdAt: string;
+  daysCompleted: number;
+  daysRemaining: number;
   exchangeRate: string;
   id: string;
   maturesAt: string;
@@ -173,13 +188,37 @@ export type ClientInvestment = {
     risk: string;
     slug: string;
   };
+  profit: {
+    accruedDays: number;
+    availableUsd: string;
+    availableWalletAmount: string;
+    dailyUsd: string;
+    dailyWalletAmount: string;
+    entries?: ClientInvestmentProfit[];
+    totalAccruedUsd: string;
+    totalAccruedWalletAmount: string;
+    withdrawnUsd: string;
+    withdrawnWalletAmount: string;
+  };
+  progressPercent: number;
   projectedProfitUsd: string;
   projectedTotalUsd: string;
   quoteExpiresAt: string;
   rateQuotedAt: string;
   rateSource: string;
   startsAt: string;
-  status: "active" | "completed" | "cancelled";
+  status: "active" | "matured" | "completed" | "cancelled";
   walletAmount: string;
   walletCurrency: string;
+};
+
+export type ClientInvestmentProfit = {
+  amountUsd: string;
+  creditDate: string;
+  dayNumber: number;
+  id: string;
+  status: "available" | "withdrawn";
+  walletAmount: string;
+  walletCurrency: string;
+  withdrawnAt: string | null;
 };
