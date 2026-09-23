@@ -30,6 +30,7 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [apiError, setApiError] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -58,6 +59,7 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
         API_ENDPOINTS.client.clientLogin,
         { email: email.trim(), password },
       );
+      setIsRedirecting(true);
       router.replace(returnTo);
       router.refresh();
     } catch (error) {
@@ -66,7 +68,6 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
           ? error.message
           : "We could not log you in. Please try again.",
       );
-    } finally {
       setIsSubmitting(false);
     }
   }
@@ -180,11 +181,15 @@ export function LoginForm({ returnTo = "/dashboard" }: { returnTo?: string }) {
 
         <button
           className="mt-7 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(6,184,102,0.2)] transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-hover)]"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isRedirecting}
           type="submit"
         >
-          {isSubmitting ? "Logging in…" : "Log In"}
-          {isSubmitting ? (
+          {isRedirecting
+            ? "Redirecting to dashboard…"
+            : isSubmitting
+              ? "Logging in…"
+              : "Log In"}
+          {isSubmitting || isRedirecting ? (
             <SpinnerGap aria-hidden="true" className="animate-spin" size={18} />
           ) : (
             <ArrowRight aria-hidden="true" size={17} weight="bold" />
