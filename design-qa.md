@@ -1,61 +1,55 @@
-# TradeUply Light Hero — Design QA
+# Responsive Client Area — Design QA
 
-## Evidence
-
-- Source visual truth: `design-reference/option-1-light.png`
-- Desktop implementation: `design-reference/implementation-light-desktop-final.png`
-- Mobile implementation: `design-reference/implementation-light-mobile-final.png`
-- Full-view comparison: `design-reference/comparison-light-final.png`
-- Focused header comparison: `design-reference/comparison-light-header.png`
-- Focused hero-copy comparison: `design-reference/comparison-light-copy.png`
-- State: light-theme home hero, navigation closed, page at top
-- Desktop CSS viewport: 1440 × 1024 at deviceScaleFactor 1
-- Mobile CSS viewport: 390 × 844 at deviceScaleFactor 1
-- Source pixels: 1487 × 1058, normalized to 1440 × 1024 for comparison
-- Desktop screenshot pixels: 1440 × 1024; no density normalization required
-- Mobile screenshot pixels: 390 × 844; no density normalization required
+- Source visual truth: `/var/folders/6v/tsrf5q3s4zq75hqlgvpss3sc0000gn/T/TemporaryItems/NSIRD_screencaptureui_14ReBa/Screenshot 2026-09-23 at 10.44.42 PM.png`
+- Implementation URL: `http://localhost:3000/dashboard`
+- Implementation screenshot: unavailable — the Codex in-app browser denied access because its admin-enforced security policy could not be verified.
+- Target viewport: 520 × 884 CSS px (mobile); tablet coverage intended for 640–1023 CSS px.
+- Source pixels: 1160 × 2028 px; source capture includes browser/annotation chrome and appears approximately 2× density.
+- Implementation pixels/CSS size/density: unavailable because browser capture was blocked.
+- State: authenticated client dashboard with funded ETH and SOL wallets.
 
 ## Full-view comparison evidence
 
-The final side-by-side comparison confirms the selected composition: premium floating light navbar, left-aligned SEO hero copy, globe and glass T+U market sculpture on the right, paired CTAs, and the centered benefit strip at the bottom. Major-region proportions, section height, background crop, and vertical hierarchy match the source closely.
+The source capture shows a P1 responsive failure: the client module navigation and dashboard wallet card extend beyond the right edge of the 520 px viewport, hiding navigation items and card content. The implementation was updated to use a two-column mobile navigation grid, a three-column tablet navigation grid, `min-width: 0` constraints, mobile-first card padding, full-width mobile action buttons, responsive card sub-grids, and bottom-sheet dialogs on phones.
 
-## Focused comparison evidence
+A browser-rendered post-fix screenshot could not be captured, so the visual comparison cannot be completed.
 
-- Header: the official full TradeUply logo, navigation grouping, active Home treatment, Log In link, Open Account CTA, border, radius, and elevation are present and aligned with the selected visual.
-- Hero copy and controls: Manrope matches the logo's geometric character; the heading wrapping, supporting-copy line breaks, button dimensions, spacing, colors, and contrast track the source. The focused crops make these details readable, so no additional crop was necessary.
+## Focused-region comparison evidence
 
-## Required fidelity surfaces
-
-- Fonts and typography: passed. Manrope Variable is used consistently; display weight, responsive `clamp()` sizing, line height, letter spacing, wrapping, and body hierarchy are faithful and readable.
-- Spacing and layout rhythm: passed. Navbar height, desktop content offsets, CTA spacing, responsive padding, hero height, benefit-strip placement, radii, and shadows have no actionable P0/P1/P2 mismatch.
-- Colors and visual tokens: passed. Porcelain white, TradeUply navy, emerald CTA, pale green active state, border opacity, and light shadow tokens match the reference direction and meet contrast needs.
-- Image quality and asset fidelity: passed. The hero uses a dedicated high-resolution raster background generated from the selected visual; the official supplied logo is used in the navbar. No CSS/div/SVG approximation replaces custom artwork.
-- Copy and content: passed. Navbar labels, eyebrow, H1, supporting paragraph, CTAs, and benefit labels match the selected visual and approved SEO copy.
-
-## Interaction and responsive checks
-
-- Mobile menu opens, exposes all navigation links, closes, and restores body scrolling.
-- Discover TradeUply targets `#market-access` and scrolls to the benefit strip.
-- Desktop and mobile have zero horizontal overflow.
-- Primary and secondary links expose clear hover and focus-visible states.
-- Browser console checked in the production build: no errors or warnings.
-- Production build, TypeScript validation, and ESLint all passed.
-
-## Comparison history
-
-1. Initial desktop pass: P1 background containment exposed a visible image edge and compressed the intended full-bleed composition. Fixed by placing the raster in a full-width, bottom-aligned image stage and using an intentional cover crop.
-2. Second pass: P2 navbar height/navigation proportions and hero offsets drifted from the source. Fixed by increasing navbar height and logo scale, widening navigation items, and aligning desktop hero content to the reference grid.
-3. Third pass: P2 CTA height/spacing, inherited primary-button text color, and desktop body-copy wrapping differed. Fixed by using 60 px button height, source-like CTA widths/gap, removing the overriding global link color, tuning the responsive heading size, and adding desktop-only semantic line breaks.
-4. Final pass: the combined full-view and focused comparisons show no remaining actionable P0/P1/P2 findings. The small difference between the generated source's globe crop and the production background crop is acceptable P3 variation caused by separating the background from the UI for accessible HTML.
+Focused source region: client navigation and wallet balance card. It visibly demonstrates horizontal clipping and desktop-width sizing. Post-fix focused evidence is unavailable because the in-app browser security check failed repeatedly.
 
 ## Findings
 
-- No actionable P0, P1, or P2 findings remain.
+- [P1] Post-fix responsive rendering is not visually verified.
+  - Location: all authenticated client routes and dialogs.
+  - Evidence: the source shows overflow; source code and a successful production build confirm the responsive changes compile, but the browser-rendered result could not be captured.
+  - Impact: visual regressions at exact phone and tablet widths cannot be ruled out.
+  - Fix: refresh the authenticated client tab when browser access is available, capture dashboard at 520 × 884 and tablet width, then exercise each client route and money-flow modal.
 
-## Follow-up polish
+## Required fidelity surfaces
 
-- P3: the source mock's globe begins slightly lower than the production crop. The current crop keeps the sculpture visible across responsive widths and is accepted for implementation.
+- Fonts and typography: Manrope and existing hierarchy preserved; mobile heading and number sizes were reduced where overflow risk was visible. Browser verification blocked.
+- Spacing and layout rhythm: mobile gutters, radii, padding, navigation grid, card stacks, and dialog bottom sheets were implemented. Browser verification blocked.
+- Colors and visual tokens: existing TradeUply navy, green, borders, state colors, shadows, and tokens were preserved.
+- Image quality and asset fidelity: existing TradeUply logo, QR rendering, and Phosphor icons were preserved; no substitute imagery was introduced.
+- Copy and content: existing copy and dynamic data were preserved.
+- Accessibility and interactions: tap targets remain at least 44 px; truncation/breaking was added for long labels, addresses, amounts, and references. Browser interaction verification blocked.
 
-## Final result
+## Comparison history
 
-final result: passed
+1. Earlier finding: P1 horizontal overflow in the module navigation and wallet card at 520 px.
+2. Fixes made: responsive navigation grid; width containment; mobile card/button layouts; responsive portfolio, fund, transaction, payment-method, deposit, withdrawal, and investment dialogs; viewport-safe dialog heights.
+3. Post-fix evidence: production build passed, but visual evidence is unavailable because browser policy verification failed.
+
+## Implementation checklist
+
+- [x] Shared client shell and module navigation updated.
+- [x] Dashboard wallet and history sections updated.
+- [x] Portfolio and investment fund cards/dialogs updated.
+- [x] Transactions and payment methods updated.
+- [x] Deposit and withdrawal dialogs updated.
+- [x] Production build completed successfully.
+- [ ] Capture and compare mobile/tablet browser renders.
+- [ ] Confirm no console errors during client-route interactions.
+
+final result: blocked

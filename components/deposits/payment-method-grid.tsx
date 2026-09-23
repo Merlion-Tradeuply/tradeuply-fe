@@ -32,7 +32,7 @@ export function PaymentMethodGrid({
   const cryptoMethods = methods.filter((method) => method.category === "crypto");
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid min-w-0 gap-3 sm:grid-cols-2">
       {cryptoMethods.map((method) => {
         const Icon = icons[method.code as keyof typeof icons] ?? Wallet;
         const isAvailable =
@@ -45,7 +45,7 @@ export function PaymentMethodGrid({
         return (
           <button
             className={cn(
-              "relative flex min-h-24 items-center gap-4 rounded-2xl border p-4 text-left transition",
+              "relative flex min-h-24 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border p-4 text-left transition sm:gap-4",
               isSelected
                 ? "border-[var(--color-brand)] bg-[var(--color-brand-soft)] shadow-[0_10px_30px_rgba(6,184,102,0.1)]"
                 : "border-[var(--color-border)] bg-white",
@@ -61,8 +61,8 @@ export function PaymentMethodGrid({
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#edf5f1] text-[var(--color-brand-hover)]">
               <Icon aria-hidden="true" size={23} weight="duotone" />
             </span>
-            <span>
-              <span className="block text-sm font-extrabold text-[var(--color-ink)]">{method.name}</span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-extrabold text-[var(--color-ink)]">{method.name}</span>
               <span className="mt-1 block text-[0.68rem] font-bold text-[var(--color-text-muted)]">
                 {isAvailable
                   ? `${method.asset} · ${method.network} · Available`

@@ -207,7 +207,7 @@ export function ClientPaymentMethods({
 
   return (
     <>
-      <section className="rounded-[1.5rem] border border-[var(--color-border)] bg-white p-4 shadow-[0_18px_55px_rgba(18,45,72,0.055)] sm:p-5">
+      <section className="min-w-0 rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 shadow-[0_18px_55px_rgba(18,45,72,0.055)] sm:rounded-[1.5rem] sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-extrabold text-[var(--color-ink)]">Your crypto wallets</p>
@@ -252,7 +252,7 @@ export function ClientPaymentMethods({
         <div className="mt-5 grid gap-4 xl:grid-cols-2">
           {methods.map((method) => (
             <article
-              className="rounded-[1.5rem] border border-[var(--color-border)] bg-white p-4 shadow-[0_16px_45px_rgba(18,45,72,0.05)] sm:p-5"
+              className="min-w-0 overflow-hidden rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 shadow-[0_16px_45px_rgba(18,45,72,0.05)] sm:rounded-[1.5rem] sm:p-5"
               key={method.id}
             >
               <div className="flex items-start gap-4">
@@ -290,7 +290,7 @@ export function ClientPaymentMethods({
                 </button>
               </div>
 
-              <div className="mt-4 flex items-center justify-end gap-2 border-t border-[var(--color-border)] pt-4">
+              <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-[var(--color-border)] pt-4">
                 {confirmDeleteId === method.id ? (
                   <>
                     <span className="mr-auto text-xs font-bold text-[#b94f32]">Delete this wallet?</span>
@@ -337,11 +337,11 @@ export function ClientPaymentMethods({
       )}
 
       {isOpen && (
-        <div className="fixed inset-0 z-[80] grid place-items-center overflow-y-auto bg-[#031a3b]/55 p-3 backdrop-blur-sm sm:p-6">
+        <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-y-auto bg-[#031a3b]/55 p-0 backdrop-blur-sm sm:grid sm:place-items-center sm:p-6">
           <section
             aria-labelledby="wallet-form-title"
             aria-modal="true"
-            className="my-auto w-full max-w-2xl overflow-hidden rounded-[1.5rem] bg-[#f4f8f6] shadow-[0_35px_100px_rgba(3,26,59,0.3)]"
+            className="w-full min-w-0 max-w-2xl overflow-hidden rounded-t-[1.5rem] bg-[#f4f8f6] shadow-[0_35px_100px_rgba(3,26,59,0.3)] sm:my-auto sm:rounded-[1.5rem]"
             role="dialog"
           >
             <header className="flex items-center justify-between border-b border-[var(--color-border)] bg-white px-5 py-4 sm:px-6">
@@ -364,7 +364,7 @@ export function ClientPaymentMethods({
               </button>
             </header>
 
-            <form className="max-h-[calc(100vh-8rem)] overflow-y-auto p-5 sm:p-6" onSubmit={handleSubmit}>
+            <form className="max-h-[calc(100dvh-5.5rem)] overflow-y-auto p-4 sm:max-h-[calc(100dvh-8rem)] sm:p-6" onSubmit={handleSubmit}>
               {error && (
                 <div className="mb-4 flex items-start gap-2 rounded-xl bg-[#fff1ed] p-3 text-xs font-bold text-[#b94f32]">
                   <WarningCircle className="shrink-0" size={18} /> {error}

@@ -182,7 +182,7 @@ export function ClientTransactionHistory({
         ))}
       </section>
 
-      <section className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-white shadow-[0_18px_55px_rgba(18,45,72,0.055)]">
+      <section className="mt-5 min-w-0 max-w-full overflow-hidden rounded-[1.25rem] border border-[var(--color-border)] bg-white shadow-[0_18px_55px_rgba(18,45,72,0.055)] sm:rounded-[1.5rem]">
         <div className="relative z-20 rounded-t-[1.5rem] border-b border-[var(--color-border)] bg-white p-3 sm:p-4">
           <div className="relative">
             <MagnifyingGlass
@@ -418,7 +418,7 @@ function TransactionCard({ transaction }: { transaction: ClientTransaction }) {
             <span className="min-w-0 truncate">{transaction.destination}</span>
           </div>
 
-          <dl className="mt-3 grid grid-cols-2 gap-2">
+          <dl className="mt-3 grid gap-2 min-[400px]:grid-cols-2">
             <div className="rounded-xl border border-[var(--color-border)] p-2.5">
               <dt className="text-[0.52rem] font-extrabold tracking-[0.07em] text-[var(--color-text-muted)] uppercase">
                 Balance before

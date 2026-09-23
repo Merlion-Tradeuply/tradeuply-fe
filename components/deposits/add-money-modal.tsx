@@ -3,7 +3,6 @@
 import {
   ArrowLeft,
   CheckCircle,
-  ClockCountdown,
   X,
 } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -95,35 +94,23 @@ export function AddMoneyModal({
   return (
     <div className="fixed inset-0 z-[75] flex items-end justify-center bg-[var(--color-ink)]/52 backdrop-blur-sm sm:items-center sm:p-5">
       <button aria-label="Close add money" className="absolute inset-0" onClick={closeModal} type="button" />
-      <section aria-modal="true" className="relative max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-t-[2rem] bg-[#f5f8f7] shadow-2xl sm:rounded-[2rem]" role="dialog">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-white/94 px-5 py-5 backdrop-blur sm:px-8">
-          <div className="flex items-center gap-3">
+      <section aria-modal="true" className="relative max-h-[96dvh] w-full min-w-0 max-w-5xl overflow-y-auto rounded-t-[1.5rem] bg-[#f5f8f7] shadow-2xl sm:max-h-[94vh] sm:rounded-[2rem]" role="dialog">
+        <header className="sticky top-0 z-10 flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-white/94 px-4 py-4 backdrop-blur sm:px-8 sm:py-5">
+          <div className="flex min-w-0 items-center gap-3">
             {selectedMethod && !submittedDeposit && (
               <button aria-label="Choose another payment method" className="grid size-10 place-items-center rounded-xl border border-[var(--color-border)]" onClick={() => updateUrl()} type="button"><ArrowLeft size={18} weight="bold" /></button>
             )}
-            <div>
+            <div className="min-w-0">
               <p className="text-[0.62rem] font-extrabold tracking-[0.17em] text-[var(--color-brand-hover)] uppercase">Fund your account</p>
-              <h2 className="mt-1 text-lg font-extrabold text-[var(--color-ink)]">{selectedMethod ? selectedMethod.name : "Choose a payment method"}</h2>
+              <h2 className="mt-1 truncate text-base font-extrabold text-[var(--color-ink)] sm:text-lg">{selectedMethod ? selectedMethod.name : "Choose a payment method"}</h2>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div
-              aria-live="polite"
-              className={`flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-extrabold ${
-                secondsRemaining <= 120
-                  ? "border-amber-300 bg-amber-50 text-amber-800"
-                  : "border-[var(--color-border)] bg-[#f8faf9] text-[var(--color-ink)]"
-              }`}
-              title="This payment window closes automatically when the timer expires."
-            >
-              <ClockCountdown size={17} weight="duotone" />
-              <span>{formatCountdown(secondsRemaining)}</span>
-            </div>
             <button aria-label="Close" className="grid size-10 place-items-center rounded-xl border border-[var(--color-border)] bg-white" onClick={closeModal} type="button"><X size={19} weight="bold" /></button>
           </div>
         </header>
 
-        <div className="p-5 sm:p-8">
+        <div className="min-w-0 p-4 sm:p-8">
           {submittedDeposit ? (
             <div className="mx-auto max-w-xl py-10 text-center">
               <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]"><CheckCircle size={34} weight="duotone" /></span>
@@ -137,6 +124,8 @@ export function AddMoneyModal({
             selectedMethod.network &&
             selectedMethod.qrCodeUrl ? (
             <CryptoDepositForm
+              countdown={formatCountdown(secondsRemaining)}
+              countdownUrgent={secondsRemaining <= 120}
               initialAmount={initialAmount}
               key={`${selectedMethod.id}:${initialAmount}`}
               method={selectedMethod}

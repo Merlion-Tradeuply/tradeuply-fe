@@ -54,13 +54,13 @@ export function WithdrawModal({ balances, methods, onSubmitted }: { balances: Cl
   }
 
   if (!isOpen) return null;
-  return <div className="fixed inset-0 z-[80] grid place-items-center overflow-y-auto bg-[#031a3b]/55 p-3 backdrop-blur-sm sm:p-6">
-    <section aria-modal="true" className="my-auto w-full max-w-xl overflow-hidden rounded-[1.6rem] bg-[#f4f8f6] shadow-2xl" role="dialog">
+  return <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-y-auto bg-[#031a3b]/55 p-0 backdrop-blur-sm sm:grid sm:place-items-center sm:p-6">
+    <section aria-modal="true" className="w-full min-w-0 max-w-xl overflow-hidden rounded-t-[1.6rem] bg-[#f4f8f6] shadow-2xl sm:my-auto sm:rounded-[1.6rem]" role="dialog">
       <header className="flex items-center justify-between border-b border-[var(--color-border)] bg-white px-5 py-4 sm:px-6">
         <div><p className="text-[0.62rem] font-extrabold tracking-[0.15em] text-[var(--color-brand-hover)] uppercase">Wallet withdrawal</p><h2 className="mt-1 text-xl font-extrabold text-[var(--color-ink)]">Request withdrawal</h2></div>
         <button aria-label="Close withdrawal" className="grid size-10 place-items-center rounded-xl border border-[var(--color-border)]" disabled={saving} onClick={close} type="button"><X size={19} /></button>
       </header>
-      <form className="p-5 sm:p-6" onSubmit={submit}>
+      <form className="max-h-[calc(100dvh-5.5rem)] overflow-y-auto p-4 sm:max-h-none sm:p-6" onSubmit={submit}>
         {error && <p className="mb-4 flex items-center gap-2 rounded-xl bg-[#fff0ec] p-3 text-xs font-bold text-[#b74c39]"><WarningCircle size={18} />{error}</p>}
         <CustomSelect id="withdraw-asset" label="Wallet balance" onChange={changeAsset} options={assetOptions} placeholder="Select balance" value={asset} />
         <label className="mt-4 block text-sm font-extrabold text-[var(--color-ink)]">Amount in {asset || "crypto"}<input className="mt-2 h-13 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm font-bold outline-none focus:border-[var(--color-brand)]" inputMode="decimal" max={balance?.availableBalance} min="0.00000001" onChange={(event) => setAmount(event.target.value)} placeholder="0.00000000" step="0.00000001" type="number" value={amount} /></label>

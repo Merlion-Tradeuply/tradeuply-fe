@@ -2,6 +2,7 @@
 
 import {
   Check,
+  ClockCountdown,
   Copy,
   SpinnerGap,
   WarningCircle,
@@ -27,11 +28,15 @@ const initialForm: DepositForm = {
 };
 
 export function CryptoDepositForm({
+  countdown,
+  countdownUrgent = false,
   initialAmount = "",
   method,
   onSubmitted,
   referenceUsdAmount,
 }: {
+  countdown: string;
+  countdownUrgent?: boolean;
   initialAmount?: string;
   method: PaymentMethod;
   onSubmitted: (deposit: Deposit) => void;
@@ -87,16 +92,30 @@ export function CryptoDepositForm({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
-      <section className="rounded-[1.5rem] bg-[var(--color-ink)] p-6 text-white">
-        <p className="text-[0.65rem] font-extrabold tracking-[0.18em] text-[#67e4a7] uppercase">
-          TradeUply Receiving Wallet
-        </p>
-        <div className="mt-5 flex justify-center rounded-2xl bg-white p-4">
+    <div className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-[0.82fr_1.18fr]">
+      <section className="min-w-0 overflow-hidden rounded-[1.25rem] bg-[var(--color-ink)] p-4 text-white sm:rounded-[1.5rem] sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[0.65rem] font-extrabold tracking-[0.18em] text-[#67e4a7] uppercase">
+            TradeUply Receiving Wallet
+          </p>
+          <div
+            aria-live="polite"
+            className={`flex min-h-9 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-extrabold ${
+              countdownUrgent
+                ? "border-amber-300/60 bg-amber-300/14 text-[#ffe1a3]"
+                : "border-white/12 bg-white/[0.07] text-white"
+            }`}
+            title="This payment window closes automatically when the timer expires."
+          >
+            <ClockCountdown size={16} weight="duotone" />
+            <span>{countdown}</span>
+          </div>
+        </div>
+        <div className="mt-5 flex min-w-0 justify-center overflow-hidden rounded-2xl bg-white p-3 sm:p-4">
           <WalletQrCode asset={asset} imageUrl={method.qrCodeUrl ?? ""} />
         </div>
         <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.06] p-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="text-xs font-extrabold text-white/55">
               Network
             </span>
@@ -130,7 +149,7 @@ export function CryptoDepositForm({
       </section>
 
       <form
-        className="rounded-[1.5rem] border border-[var(--color-border)] bg-white p-6"
+        className="min-w-0 rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:rounded-[1.5rem] sm:p-6"
         onSubmit={handleSubmit}
       >
         <h3 className="text-lg font-extrabold text-[var(--color-ink)]">
@@ -146,7 +165,7 @@ export function CryptoDepositForm({
             <p className="text-[0.58rem] font-extrabold tracking-[0.08em] text-[var(--color-brand-hover)] uppercase">
               Investment funding amount
             </p>
-            <p className="mt-1 text-sm font-extrabold text-[var(--color-ink)]">
+            <p className="mt-1 break-words text-sm font-extrabold text-[var(--color-ink)]">
               ${Number(referenceUsdAmount).toFixed(2)} USD ≈ {Number(initialAmount).toFixed(8)} {asset}
             </p>
           </div>

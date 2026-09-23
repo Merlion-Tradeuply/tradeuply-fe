@@ -90,25 +90,25 @@ export default async function DashboardPage() {
           <DashboardWallet {...walletData} />
         </Suspense>
 
-        <section aria-labelledby="account-overview" className="mt-7 grid gap-5 lg:grid-cols-3">
-          <article className="rounded-[1.6rem] border border-[var(--color-border)] bg-white p-6 shadow-[0_18px_55px_rgba(18,45,72,0.07)]">
+        <section aria-labelledby="account-overview" className="mt-6 grid min-w-0 gap-4 sm:mt-7 sm:gap-5 lg:grid-cols-3">
+          <article className="min-w-0 rounded-[1.3rem] border border-[var(--color-border)] bg-white p-5 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:rounded-[1.6rem] sm:p-6">
             <IdentificationCard aria-hidden="true" className="text-[var(--color-brand-hover)]" size={28} weight="duotone" />
             <h2 className="mt-5 text-lg font-extrabold text-[var(--color-ink)]" id="account-overview">Account holder</h2>
             <p className="mt-2 text-sm font-semibold text-[var(--color-text-muted)]">{client.firstName} {client.lastName}</p>
           </article>
-          <article className="rounded-[1.6rem] border border-[var(--color-border)] bg-white p-6 shadow-[0_18px_55px_rgba(18,45,72,0.07)]">
+          <article className="min-w-0 rounded-[1.3rem] border border-[var(--color-border)] bg-white p-5 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:rounded-[1.6rem] sm:p-6">
             <EnvelopeSimple aria-hidden="true" className="text-[var(--color-brand-hover)]" size={28} weight="duotone" />
             <h2 className="mt-5 text-lg font-extrabold text-[var(--color-ink)]">Registered email</h2>
             <p className="mt-2 break-all text-sm font-semibold text-[var(--color-text-muted)]">{client.email}</p>
           </article>
-          <article className="rounded-[1.6rem] border border-[var(--color-border)] bg-white p-6 shadow-[0_18px_55px_rgba(18,45,72,0.07)]">
+          <article className="min-w-0 rounded-[1.3rem] border border-[var(--color-border)] bg-white p-5 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:rounded-[1.6rem] sm:p-6">
             <CheckCircle aria-hidden="true" className="text-[var(--color-brand-hover)]" size={28} weight="duotone" />
             <h2 className="mt-5 text-lg font-extrabold text-[var(--color-ink)]">Account status</h2>
             <p className="mt-2 text-sm font-extrabold text-[var(--color-brand-hover)]">Active and verified</p>
           </article>
         </section>
 
-        <section className="mt-7 flex items-center gap-4 rounded-[1.6rem] border border-[var(--color-border)] bg-white p-6 sm:p-8">
+        <section className="mt-6 flex min-w-0 flex-col items-start gap-4 rounded-[1.3rem] border border-[var(--color-border)] bg-white p-5 sm:mt-7 sm:flex-row sm:items-center sm:rounded-[1.6rem] sm:p-8">
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
             <ChartLineUp aria-hidden="true" size={25} weight="duotone" />
           </span>

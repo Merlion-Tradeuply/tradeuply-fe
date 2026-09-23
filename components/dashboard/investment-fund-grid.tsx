@@ -337,14 +337,14 @@ export function InvestmentFundGrid({
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {plans.map((plan) => {
         const Icon = planIcons[plan.icon];
 
         return (
           <article
             className={cn(
-              "relative flex min-h-full flex-col overflow-hidden rounded-[1.35rem] border bg-white p-5 shadow-[0_14px_38px_rgba(18,45,72,0.055)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(18,45,72,0.09)]",
+              "relative flex min-h-full min-w-0 flex-col overflow-hidden rounded-[1.25rem] border bg-white p-4 shadow-[0_14px_38px_rgba(18,45,72,0.055)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(18,45,72,0.09)] sm:rounded-[1.35rem] sm:p-5",
               plan.isFeatured
                 ? "border-[var(--color-brand)]"
                 : "border-[var(--color-border)]",
@@ -433,7 +433,7 @@ export function InvestmentFundGrid({
           <section
             aria-labelledby="investment-modal-title"
             aria-modal="true"
-            className="relative max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-[1.7rem] bg-[#f5f8f7] shadow-2xl sm:rounded-[1.7rem]"
+            className="relative max-h-[96dvh] w-full min-w-0 max-w-3xl overflow-y-auto rounded-t-[1.5rem] bg-[#f5f8f7] shadow-2xl sm:max-h-[94vh] sm:rounded-[1.7rem]"
             role="dialog"
           >
             <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-white/95 px-5 py-4 backdrop-blur sm:px-6">
@@ -458,7 +458,7 @@ export function InvestmentFundGrid({
               </button>
             </header>
 
-            <div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[0.82fr_1.18fr]">
+            <div className="grid min-w-0 gap-4 p-4 sm:p-6 lg:grid-cols-[0.82fr_1.18fr]">
               <aside className="rounded-[1.35rem] bg-[var(--color-ink)] p-5 text-white">
                 <span className="grid size-10 place-items-center rounded-xl bg-white/10 text-[#67e4a7]">
                   <Calculator size={21} weight="duotone" />
@@ -545,7 +545,7 @@ export function InvestmentFundGrid({
                       : `Minimum investment: ${formatUsd(selectedPlan.minimumInvestment)}.`}
                   </p>
 
-                  <dl className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-[#f5f8f7] p-3">
+                  <dl className="mt-5 grid gap-2 rounded-xl bg-[#f5f8f7] p-3 min-[400px]:grid-cols-2">
                     <div>
                       <dt className="text-[0.56rem] font-extrabold tracking-[0.07em] text-[var(--color-text-muted)] uppercase">
                         Projected profit

@@ -66,23 +66,23 @@ export function DashboardWallet({
 
   return (
     <>
-      <section className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-        <article className="relative overflow-hidden rounded-[1.7rem] bg-[var(--color-ink)] p-7 text-white shadow-[0_24px_65px_rgba(3,26,59,0.14)] sm:p-8">
+      <section className="grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+        <article className="relative min-w-0 overflow-hidden rounded-[1.35rem] bg-[var(--color-ink)] p-5 text-white shadow-[0_24px_65px_rgba(3,26,59,0.14)] sm:rounded-[1.7rem] sm:p-8">
           <div aria-hidden="true" className="absolute -top-20 -right-14 size-60 rounded-full bg-[var(--color-brand)]/22 blur-3xl" />
-          <div className="relative flex items-start justify-between gap-5">
-            <div>
+          <div className="relative flex min-w-0 items-start justify-between gap-3 sm:gap-5">
+            <div className="min-w-0">
               <p className="text-xs font-extrabold tracking-[0.16em] text-[#67e4a7] uppercase">Wallet balances</p>
-              <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.035em]">Approved crypto funds</h2>
+              <h2 className="mt-3 text-xl font-extrabold tracking-[-0.035em] sm:text-2xl">Approved crypto funds</h2>
               <p className="mt-2 text-xs font-semibold text-white/48">Each cryptocurrency is tracked in its own wallet balance.</p>
             </div>
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/8 text-[#67e4a7]"><Wallet size={26} weight="duotone" /></span>
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/8 text-[#67e4a7] sm:size-12 sm:rounded-2xl"><Wallet size={24} weight="duotone" /></span>
           </div>
           {fundedBalances.length > 0 ? (
             <div className="relative mt-7 grid gap-3 sm:grid-cols-2">
               {fundedBalances.map((balance) => (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.065] p-4" key={balance.currency}>
+                <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.065] p-4" key={balance.currency}>
                   <p className="text-[0.65rem] font-extrabold tracking-[0.12em] text-white/45 uppercase">{balance.currency}</p>
-                  <p className="mt-2 text-2xl font-extrabold tracking-[-0.035em]">{balance.availableBalance}</p>
+                  <p className="mt-2 break-all text-xl font-extrabold tracking-[-0.035em] sm:text-2xl">{balance.availableBalance}</p>
                   <p className="mt-1 text-[0.65rem] font-semibold text-white/42">Available balance</p>
                 </div>
               ))}
@@ -92,13 +92,13 @@ export function DashboardWallet({
               No approved wallet balance yet. Add funds to create your first crypto wallet.
             </p>
           )}
-          <div className="relative mt-7 flex flex-wrap gap-3">
-            <button className="inline-flex min-h-13 items-center gap-2 rounded-xl bg-[var(--color-brand)] px-6 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)]" onClick={openAddMoney} type="button"><Plus size={18} weight="bold" />Add Money</button>
-            <button className="inline-flex min-h-13 items-center gap-2 rounded-xl border border-white/18 bg-white/8 px-6 text-sm font-extrabold text-white transition hover:bg-white/14 disabled:cursor-not-allowed disabled:opacity-45" disabled={fundedBalances.length === 0} onClick={openWithdraw} type="button"><ArrowUp size={18} weight="bold" />Withdraw</button>
+          <div className="relative mt-7 grid gap-3 sm:flex sm:flex-wrap">
+            <button className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)] sm:min-h-13 sm:w-auto sm:px-6" onClick={openAddMoney} type="button"><Plus size={18} weight="bold" />Add Money</button>
+            <button className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/18 bg-white/8 px-5 text-sm font-extrabold text-white transition hover:bg-white/14 disabled:cursor-not-allowed disabled:opacity-45 sm:min-h-13 sm:w-auto sm:px-6" disabled={fundedBalances.length === 0} onClick={openWithdraw} type="button"><ArrowUp size={18} weight="bold" />Withdraw</button>
           </div>
         </article>
 
-        <article className="rounded-[1.7rem] border border-[var(--color-border)] bg-white p-7 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:p-8">
+        <article className="min-w-0 rounded-[1.35rem] border border-[var(--color-border)] bg-white p-5 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:rounded-[1.7rem] sm:p-8">
           <span className="grid size-11 place-items-center rounded-xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]"><ArrowDown size={23} weight="duotone" /></span>
           <p className="mt-6 text-xs font-extrabold tracking-[0.14em] text-[var(--color-text-muted)] uppercase">Approved deposits by asset</p>
           {fundedBalances.length > 0 ? (

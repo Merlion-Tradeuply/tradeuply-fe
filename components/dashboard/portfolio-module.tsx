@@ -312,7 +312,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
       <div className="grid gap-4 xl:grid-cols-2">
         {investments.map((item) => (
           <button
-            className="rounded-[1.4rem] border border-[var(--color-border)] bg-white p-5 text-left shadow-[0_14px_38px_rgba(18,45,72,0.055)] transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_44px_rgba(18,45,72,0.09)]"
+            className="min-w-0 overflow-hidden rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 text-left shadow-[0_14px_38px_rgba(18,45,72,0.055)] transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_44px_rgba(18,45,72,0.09)] sm:rounded-[1.4rem] sm:p-5"
             key={item.id}
             onClick={() => setSelectedInvestment(item.id)}
             type="button"
@@ -331,7 +331,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
               </span>
             </div>
 
-            <dl className="mt-5 grid grid-cols-2 gap-3">
+            <dl className="mt-5 grid gap-3 min-[400px]:grid-cols-2">
               <div className="rounded-xl bg-[#f5f8f7] p-3">
                 <dt className="flex items-center gap-1.5 text-[0.58rem] font-extrabold text-[var(--color-text-muted)] uppercase">
                   <Coins size={14} weight="duotone" /> Invested
@@ -362,7 +362,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
                 style={{ width: `${item.progressPercent}%` }}
               />
             </div>
-            <div className="mt-3 flex items-center justify-between gap-3 text-[0.66rem] font-semibold text-[var(--color-text-muted)]">
+            <div className="mt-3 flex flex-col gap-1.5 text-[0.66rem] font-semibold text-[var(--color-text-muted)] min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between">
               <span>{item.progressPercent}% complete</span>
               <span className="flex items-center gap-1.5">
                 <CalendarCheck size={15} weight="duotone" />
@@ -375,7 +375,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
 
       {selectedInvestmentId && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-[#041a36]/55 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-[#041a36]/55 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onMouseDown={(event) => {
             if (event.currentTarget === event.target) setSelectedInvestment();
           }}
@@ -383,7 +383,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
           <section
             aria-label="Investment details"
             aria-modal="true"
-            className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[1.6rem] bg-[#f4f8f7] shadow-2xl"
+            className="relative max-h-[96dvh] w-full min-w-0 max-w-4xl overflow-y-auto rounded-t-[1.5rem] bg-[#f4f8f7] shadow-2xl sm:max-h-[90vh] sm:rounded-[1.6rem]"
             role="dialog"
           >
             <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-white px-5 py-4">
@@ -421,7 +421,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
             )}
 
             {!isLoading && investment && (
-              <div className="grid gap-4 p-5 lg:grid-cols-[0.78fr_1.22fr]">
+              <div className="grid min-w-0 gap-4 p-4 sm:p-5 lg:grid-cols-[0.78fr_1.22fr]">
                 <aside className="rounded-[1.3rem] bg-[var(--color-ink)] p-5 text-white">
                   <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-white/10 px-3 py-1 text-[0.58rem] font-extrabold tracking-[0.08em] uppercase">
@@ -480,7 +480,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
                         style={{ width: `${investment.progressPercent}%` }}
                       />
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="mt-4 grid gap-3 min-[400px]:grid-cols-2">
                       <div className="rounded-xl bg-[#f5f8f7] p-3">
                         <p className="text-[0.55rem] font-bold text-[var(--color-text-muted)] uppercase">
                           Start date
@@ -515,7 +515,7 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
                       </span>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="mt-4 grid gap-3 min-[400px]:grid-cols-2">
                       <div className="rounded-xl bg-[#f5f8f7] p-3">
                         <p className="text-[0.55rem] font-bold text-[var(--color-text-muted)] uppercase">
                           Daily credit
@@ -662,11 +662,11 @@ export function PortfolioModule({ investments }: { investments: ClientInvestment
       )}
 
       {isWithdrawalOpen && investment && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#041a36]/65 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-[#041a36]/65 p-0 backdrop-blur-sm sm:items-center sm:p-4">
           <section
             aria-label="Withdraw investment profit"
             aria-modal="true"
-            className="w-full max-w-xl overflow-hidden rounded-[1.5rem] bg-[#f4f8f7] shadow-[0_35px_100px_rgba(3,26,59,0.35)]"
+            className="w-full min-w-0 max-w-xl overflow-hidden rounded-t-[1.5rem] bg-[#f4f8f7] shadow-[0_35px_100px_rgba(3,26,59,0.35)] sm:rounded-[1.5rem]"
             role="dialog"
           >
             <header className="flex items-center justify-between border-b border-[var(--color-border)] bg-white px-5 py-4">
