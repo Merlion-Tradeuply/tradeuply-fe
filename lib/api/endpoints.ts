@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
   backend: {
+    clientDashboard: "/client/dashboard",
     contactEnquiry: "/contact",
     clientLogin: "/client/login",
     clientPasswordForgot: "/client/password/forgot",
