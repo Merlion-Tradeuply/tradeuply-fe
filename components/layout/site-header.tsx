@@ -27,8 +27,10 @@ const navigation = [
 
 export function SiteHeader({
   initialClient,
+  syncSession = false,
 }: {
   initialClient: AuthenticatedClient | null;
+  syncSession?: boolean;
 }) {
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -46,6 +48,8 @@ export function SiteHeader({
     : "";
 
   useEffect(() => {
+    if (!syncSession) return;
+
     let isCurrent = true;
 
     async function syncSession() {
@@ -74,7 +78,7 @@ export function SiteHeader({
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [syncSession]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";

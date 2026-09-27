@@ -1,12 +1,6 @@
-import {
-  ChartLineUp,
-  CheckCircle,
-  EnvelopeSimple,
-  IdentificationCard,
-} from "@phosphor-icons/react/dist/ssr";
+import { ChartLineUp, CheckCircle, EnvelopeSimple, IdentificationCard } from "@phosphor-icons/react/dist/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 import { ClientDashboardShell } from "@/components/dashboard/client-dashboard-shell";
 import { DashboardWallet } from "@/components/deposits/dashboard-wallet";
@@ -27,68 +21,43 @@ export const metadata = {
   title: "Client Dashboard | TradeUply",
 };
 
-async function getClient() {
-  const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
-
-  if (!accessToken) redirect("/login?returnTo=/dashboard");
-
-  const result = await requestBackend(API_ENDPOINTS.backend.clientMe, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    method: "GET",
-  });
-
-  if (result.status === 401) {
-    redirect("/api/client/token/refresh?returnTo=/dashboard");
-  }
-
-  if (result.status !== 200) throw new Error("The dashboard could not be loaded.");
-
-  return (JSON.parse(result.body) as { data: { client: AuthenticatedClient } }).data.client;
-}
-
 async function getWalletData() {
   const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
 
   if (!accessToken) redirect("/login?returnTo=/dashboard");
 
-  const authorization = { Authorization: `Bearer ${accessToken}` };
-  const [balanceResult, depositResult, methodResult, walletMethodResult, withdrawalResult] = await Promise.all([
-    requestBackend(API_ENDPOINTS.backend.clientBalance, { headers: authorization }),
-    requestBackend(API_ENDPOINTS.backend.clientDeposits, { headers: authorization }),
-    requestBackend(API_ENDPOINTS.backend.clientPaymentMethods, { headers: authorization }),
-    requestBackend(API_ENDPOINTS.backend.clientWallets, { headers: authorization }),
-    requestBackend(API_ENDPOINTS.backend.clientWithdrawals, { headers: authorization }),
-  ]);
+  const result = await requestBackend(API_ENDPOINTS.backend.clientDashboard, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 
-  if ([balanceResult, depositResult, methodResult, walletMethodResult, withdrawalResult].some((result) => result.status === 401)) {
+  if (result.status === 401) {
     redirect("/api/client/token/refresh?returnTo=/dashboard");
   }
-
-  if ([balanceResult, depositResult, methodResult, walletMethodResult, withdrawalResult].some((result) => result.status !== 200)) {
+  if (result.status !== 200) {
     throw new Error("The account wallet could not be loaded.");
   }
 
-  return {
-    balances: (JSON.parse(balanceResult.body) as { data: { balances: ClientBalance[] } }).data.balances,
-    deposits: (JSON.parse(depositResult.body) as { data: { deposits: Deposit[] } }).data.deposits,
-    methods: (JSON.parse(methodResult.body) as { data: { methods: PaymentMethod[] } }).data.methods,
-    withdrawalMethods: (JSON.parse(walletMethodResult.body) as { data: { methods: ClientWalletPaymentMethod[] } }).data.methods,
-    withdrawals: (JSON.parse(withdrawalResult.body) as { data: { withdrawals: Withdrawal[] } }).data.withdrawals,
-  };
+  return (JSON.parse(result.body) as {
+    data: {
+      balances: ClientBalance[];
+      client: AuthenticatedClient;
+      deposits: Deposit[];
+      methods: PaymentMethod[];
+      withdrawalMethods: ClientWalletPaymentMethod[];
+      withdrawals: Withdrawal[];
+    };
+  }).data;
 }
 
 export default async function DashboardPage() {
-  const [client, walletData] = await Promise.all([getClient(), getWalletData()]);
+  const { client, ...walletData } = await getWalletData();
 
   return (
     <ClientDashboardShell
       description={`Welcome, ${client.firstName}. Review your wallets and funding activity.`}
       title="Dashboard"
     >
-
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-[1.7rem] bg-white" />}>
-          <DashboardWallet {...walletData} />
-        </Suspense>
+        <DashboardWallet {...walletData} />
 
         <section aria-labelledby="account-overview" className="mt-6 grid min-w-0 gap-4 sm:mt-7 sm:gap-5 lg:grid-cols-3">
           <article className="min-w-0 rounded-[1.3rem] border border-[var(--color-border)] bg-white p-5 shadow-[0_18px_55px_rgba(18,45,72,0.07)] sm:rounded-[1.6rem] sm:p-6">
