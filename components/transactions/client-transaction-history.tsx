@@ -21,6 +21,7 @@ import { getClientTransactions } from "@/services/client-transaction.service";
 
 const typeLabels: Record<ClientTransactionType, string> = {
   adjustment: "Adjustment",
+  bonus: "Bonus",
   capital_return: "Capital return",
   deposit: "Deposit",
   investment: "Investment",
@@ -35,6 +36,7 @@ const typeOptions: readonly SelectOption[] = [
   { label: "Capital returns", value: "capital_return" },
   { label: "Withdrawals", value: "withdrawal" },
   { label: "Adjustments", value: "adjustment" },
+  { label: "Bonuses", value: "bonus" },
 ];
 const directionOptions: readonly SelectOption[] = [
   { label: "Credits and debits", value: "all" },
@@ -69,6 +71,7 @@ function typeClasses(type: ClientTransactionType) {
   if (type === "profit_withdrawal") return "bg-amber-50 text-amber-700";
   if (type === "capital_return") return "bg-violet-50 text-violet-700";
   if (type === "withdrawal") return "bg-rose-50 text-rose-700";
+  if (type === "bonus") return "bg-emerald-50 text-emerald-700";
   return "bg-slate-100 text-slate-600";
 }
 

@@ -262,7 +262,8 @@ export type ClientTransactionType =
   | "adjustment"
   | "investment"
   | "capital_return"
-  | "profit_withdrawal";
+  | "profit_withdrawal"
+  | "bonus";
 
 export type ClientTransaction = {
   amount: string;
