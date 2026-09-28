@@ -144,6 +144,11 @@ export type Deposit = {
   methodName: string;
   network: string;
   paymentCategory: "crypto" | "wallet";
+  paymentExchangeRate: string | null;
+  paymentQuoteExpiresAt: string | null;
+  paymentRateQuotedAt: string | null;
+  paymentRateSource: string | null;
+  requestedAmountUsd: string | null;
   exchangeRate: string | null;
   quoteExpiresAt: string | null;
   rateQuotedAt: string | null;

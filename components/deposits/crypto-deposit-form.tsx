@@ -4,17 +4,20 @@ import {
   Check,
   ClockCountdown,
   Copy,
+  ArrowsClockwise,
   SpinnerGap,
   WarningCircle,
 } from "@phosphor-icons/react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { WalletQrCode } from "@/components/deposits/wallet-qr-code";
-import type { Deposit, PaymentMethod } from "@/lib/api/types";
+import type { CurrencyConversion, Deposit, PaymentMethod } from "@/lib/api/types";
+import { getCurrencyConversion } from "@/services/currency.service";
 import { submitDeposit } from "@/services/deposit.service";
 
 type DepositForm = {
   amount: string;
+  amountUsd: string;
   notes: string;
   senderWalletAddress: string;
   transactionHash: string;
@@ -22,6 +25,7 @@ type DepositForm = {
 
 const initialForm: DepositForm = {
   amount: "",
+  amountUsd: "",
   notes: "",
   senderWalletAddress: "",
   transactionHash: "",
@@ -47,15 +51,91 @@ export function CryptoDepositForm({
   const [form, setForm] = useState({
     ...initialForm,
     amount: initialAmount,
+    amountUsd: referenceUsdAmount ?? "",
   });
+  const [conversion, setConversion] = useState<CurrencyConversion | null>(null);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(Boolean(referenceUsdAmount));
+  const [quoteError, setQuoteError] = useState("");
+  const [quoteRefreshCounter, setQuoteRefreshCounter] = useState(0);
+  const [quoteSecondsRemaining, setQuoteSecondsRemaining] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const asset = method.asset ?? "Crypto";
   const walletAddress = method.walletAddress ?? "";
   const isUpi = method.category === "wallet";
 
+  useEffect(() => {
+    const amountUsd = Number(form.amountUsd);
+    if (!Number.isFinite(amountUsd) || amountUsd <= 0) {
+      return;
+    }
+
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void getCurrencyConversion({ amount: amountUsd, from: "USD", to: asset })
+        .then((quote) => {
+          if (!active) return;
+          setConversion(quote);
+          setQuoteSecondsRemaining(Math.max(0, Math.ceil((new Date(quote.quoteExpiresAt).getTime() - Date.now()) / 1000)));
+          setForm((current) => ({
+            ...current,
+            amount: isUpi
+              ? quote.convertedAmount.toFixed(2)
+              : quote.convertedAmount.toFixed(8),
+          }));
+        })
+        .catch((reason: unknown) => {
+          if (!active) return;
+          setConversion(null);
+          setQuoteSecondsRemaining(0);
+          setForm((current) => ({ ...current, amount: "" }));
+          setQuoteError(reason instanceof Error ? reason.message : "The live USD quote is unavailable.");
+        })
+        .finally(() => {
+          if (active) setIsLoadingQuote(false);
+        });
+    }, 350);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [asset, form.amountUsd, isUpi, quoteRefreshCounter]);
+
+  useEffect(() => {
+    if (!conversion) return;
+    const updateCountdown = () => {
+      const seconds = Math.max(0, Math.ceil((new Date(conversion.quoteExpiresAt).getTime() - Date.now()) / 1000));
+      setQuoteSecondsRemaining(seconds);
+      if (seconds === 0) {
+        setConversion(null);
+        setIsLoadingQuote(true);
+        setQuoteRefreshCounter((current) => current + 1);
+      }
+    };
+    const interval = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(interval);
+  }, [conversion]);
+
   function updateField(field: keyof DepositForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
     setError("");
+  }
+
+  function updateUsdAmount(value: string) {
+    setForm((current) => ({ ...current, amount: "", amountUsd: value }));
+    setConversion(null);
+    setQuoteSecondsRemaining(0);
+    setQuoteError("");
+    setError("");
+    setIsLoadingQuote(Number(value) > 0);
+  }
+
+  function refreshQuote() {
+    setConversion(null);
+    setQuoteSecondsRemaining(0);
+    setQuoteError("");
+    setIsLoadingQuote(true);
+    setQuoteRefreshCounter((current) => current + 1);
   }
 
   async function copyWalletAddress() {
@@ -73,6 +153,7 @@ export function CryptoDepositForm({
     try {
       const deposit = await submitDeposit({
         amount: Number(form.amount),
+        amountUsd: Number(form.amountUsd),
         notes: form.notes,
         paymentMethodId: method.id,
         senderWalletAddress: form.senderWalletAddress,
@@ -80,6 +161,8 @@ export function CryptoDepositForm({
       });
 
       setForm(initialForm);
+      setConversion(null);
+      setQuoteSecondsRemaining(0);
       onSubmitted(deposit);
     } catch (requestError) {
       setError(
@@ -163,34 +246,69 @@ export function CryptoDepositForm({
             : "Complete the transfer first, then provide the blockchain details below."}
         </p>
 
-        {initialAmount && referenceUsdAmount && (
+        {referenceUsdAmount && (
           <div className="mt-5 rounded-xl bg-[var(--color-brand-soft)] p-3">
             <p className="text-[0.58rem] font-extrabold tracking-[0.08em] text-[var(--color-brand-hover)] uppercase">
               Investment funding amount
             </p>
             <p className="mt-1 break-words text-sm font-extrabold text-[var(--color-ink)]">
-              ${Number(referenceUsdAmount).toFixed(2)} USD ≈ {Number(initialAmount).toFixed(8)} {asset}
+              ${Number(referenceUsdAmount).toFixed(2)} USD · fixed by the selected investment plan
             </p>
           </div>
         )}
 
         <label
           className="mt-6 block text-xs font-extrabold text-[var(--color-ink)]"
-          htmlFor="deposit-amount"
+          htmlFor="deposit-usd-amount"
         >
-          Amount in {asset}
+          Amount in USD
+        </label>
+        <div className="relative mt-2">
+          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-extrabold text-[var(--color-text-muted)]">$</span>
+          <input
+            className="h-13 w-full rounded-xl border border-[var(--color-border)] bg-[#f8faf9] pr-4 pl-8 text-sm font-bold outline-none focus:border-[var(--color-brand)] read-only:cursor-not-allowed read-only:bg-slate-100"
+            id="deposit-usd-amount"
+            min="0.01"
+            onChange={(event) => updateUsdAmount(event.target.value)}
+            readOnly={Boolean(referenceUsdAmount)}
+            required
+            step="0.01"
+            type="number"
+            value={form.amountUsd}
+          />
+        </div>
+
+        <label className="mt-4 block text-xs font-extrabold text-[var(--color-ink)]" htmlFor="deposit-amount">
+          {isUpi ? `Amount to pay in ${asset}` : `Amount to send in ${asset}`}
         </label>
         <input
-          className="mt-2 h-13 w-full rounded-xl border border-[var(--color-border)] bg-[#f8faf9] px-4 text-sm font-bold outline-none focus:border-[var(--color-brand)]"
+          className="mt-2 h-13 w-full cursor-not-allowed rounded-xl border border-[var(--color-border)] bg-slate-100 px-4 text-sm font-bold outline-none"
           id="deposit-amount"
-          min={isUpi ? undefined : (method.minimumAmount ?? "0.00000001")}
-          onChange={(event) => updateField("amount", event.target.value)}
-          readOnly={Boolean(initialAmount)}
+          readOnly
           required
-          step={isUpi ? "0.01" : "0.00000001"}
-          type="number"
+          type="text"
           value={form.amount}
         />
+
+        <div aria-live="polite" className="mt-3 min-h-12">
+          {isLoadingQuote ? (
+            <p className="flex items-center gap-2 rounded-xl bg-[#f4f8f6] p-3 text-xs font-bold text-[var(--color-text-muted)]"><SpinnerGap className="animate-spin" size={16} />Calculating live USD conversion…</p>
+          ) : conversion ? (
+            <div className="rounded-xl border border-[var(--color-brand)]/20 bg-[var(--color-brand-soft)] p-3">
+              <p className="text-sm font-extrabold text-[var(--color-ink)]">
+                ${Number(form.amountUsd).toFixed(2)} USD ≈ {isUpi ? Number(form.amount).toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 2 }) : form.amount} {asset}
+              </p>
+              <p className="mt-1 flex flex-wrap items-center gap-1 text-[0.66rem] font-semibold text-[var(--color-text-muted)]">
+                1 USD = {conversion.rate.toFixed(isUpi ? 4 : 10)} {asset} · {conversion.source} · refreshes in {Math.floor(quoteSecondsRemaining / 60)}:{String(quoteSecondsRemaining % 60).padStart(2, "0")}
+              </p>
+            </div>
+          ) : quoteError ? (
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-[#fff3ef] p-3 text-xs font-bold text-[#b74c39]">
+              <span>{quoteError}</span>
+              <button aria-label="Retry conversion quote" className="shrink-0" onClick={refreshQuote} type="button"><ArrowsClockwise size={18} weight="bold" /></button>
+            </div>
+          ) : null}
+        </div>
 
         <label
           className="mt-4 block text-xs font-extrabold text-[var(--color-ink)]"
@@ -254,7 +372,7 @@ export function CryptoDepositForm({
 
         <button
           className="mt-5 flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand)] px-5 text-sm font-extrabold text-white transition hover:bg-[var(--color-brand-hover)] disabled:opacity-65"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoadingQuote || !conversion || quoteSecondsRemaining <= 0}
           type="submit"
         >
           {isSubmitting && <SpinnerGap className="animate-spin" size={18} />}
