@@ -3,6 +3,7 @@ import type { Deposit } from "@/lib/api/types";
 
 type DepositPayload = {
   amount: number;
+  amountUsd: number;
   notes: string;
   paymentMethodId: string;
   senderWalletAddress: string;

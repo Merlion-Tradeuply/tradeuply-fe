@@ -115,7 +115,7 @@ export function AddMoneyModal({
             <div className="mx-auto max-w-xl py-10 text-center">
               <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]"><CheckCircle size={34} weight="duotone" /></span>
               <h3 className="mt-6 text-2xl font-extrabold text-[var(--color-ink)]">Deposit submitted</h3>
-              <p className="mt-3 text-sm leading-7 font-medium text-[var(--color-text-muted)]">Your {submittedDeposit.amount} {submittedDeposit.asset} transaction is pending administrator verification. Your {submittedDeposit.asset} wallet balance will update only after approval.</p>
+              <p className="mt-3 text-sm leading-7 font-medium text-[var(--color-text-muted)]">Your {submittedDeposit.requestedAmountUsd ? `$${Number(submittedDeposit.requestedAmountUsd).toFixed(2)} USD deposit paid as ` : ""}{submittedDeposit.amount} {submittedDeposit.asset} is pending administrator verification. Your wallet balance will update only after approval.</p>
               <button className="mt-7 rounded-xl bg-[var(--color-brand)] px-7 py-3 text-sm font-extrabold text-white" onClick={closeModal} type="button">{completionButtonLabel}</button>
             </div>
           ) : selectedMethod &&
@@ -128,7 +128,7 @@ export function AddMoneyModal({
               countdown={formatCountdown(secondsRemaining)}
               countdownUrgent={secondsRemaining <= 120}
               initialAmount={initialAmount}
-              key={`${selectedMethod.id}:${initialAmount}`}
+              key={`${selectedMethod.id}:${initialAmount}:${referenceUsdAmount ?? ""}`}
               method={selectedMethod}
               onSubmitted={(deposit) => {
                 setSubmittedDeposit(deposit);
