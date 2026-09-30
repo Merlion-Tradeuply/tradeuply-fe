@@ -37,6 +37,16 @@ export function getPasswordStrength(password: string) {
   return checks.filter(Boolean).length;
 }
 
+export function isValidClientPassword(password: string) {
+  return (
+    password.length >= 8 &&
+    password.length <= 128 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /\d/.test(password)
+  );
+}
+
 export function validateClientRegistrationStep(step: number, data: ClientRegistrationData) {
   const errors: ClientRegistrationErrors = {};
 
@@ -50,8 +60,8 @@ export function validateClientRegistrationStep(step: number, data: ClientRegistr
   }
 
   if (step === 2) {
-    if (getPasswordStrength(data.password) < 4) {
-      errors.password = "Use at least 8 characters with uppercase, lowercase, and a number.";
+    if (!isValidClientPassword(data.password)) {
+      errors.password = "Use 8–128 characters with uppercase, lowercase, and a number.";
     }
     if (data.confirmPassword !== data.password) {
       errors.confirmPassword = "The passwords do not match.";
