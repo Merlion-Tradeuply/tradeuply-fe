@@ -37,7 +37,7 @@ const initialData: ClientRegistrationData = {
   lastName: "",
   objective: "",
   password: "",
-  phone: "",
+  phone: "+91",
   riskAccepted: false,
   termsAccepted: false,
 };
@@ -245,7 +245,7 @@ export function ClientRegistrationForm() {
               </div>
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <TextField autoComplete="email" error={errors.email} id="email" inputMode="email" label="Email address" onChange={(value) => updateField("email", value)} placeholder="name@example.com" type="email" value={data.email} />
-                <TextField autoComplete="tel" error={errors.phone} help="Include the international country code." id="phone" inputMode="tel" label="Phone number" onChange={(value) => updateField("phone", value)} placeholder="+91 98765 43210" type="tel" value={data.phone} />
+                <PhoneField error={errors.phone} id="phone" onChange={(value) => updateField("phone", value)} value={data.phone} />
               </div>
             </fieldset>
           )}
@@ -271,7 +271,7 @@ export function ClientRegistrationForm() {
                   ))}
                 </div>
                 <p className="mt-2 text-xs font-semibold text-[var(--color-text-muted)]">
-                  Use 8+ characters with uppercase, lowercase, and a number.
+                  Use 8–128 characters with uppercase, lowercase, and a number.
                 </p>
               </div>
 
@@ -391,6 +391,47 @@ function TextField({ autoComplete, error, help, id, inputMode, label, onChange, 
       <label className="text-sm font-extrabold text-[var(--color-ink)]" htmlFor={id}>{label}</label>
       <input aria-describedby={descriptionId} aria-invalid={Boolean(error)} autoComplete={autoComplete} className={`mt-2.5 h-13 w-full rounded-xl border bg-[#f8faf9] px-4 text-sm font-bold text-[var(--color-ink)] outline-none transition placeholder:text-slate-400 focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/10 ${error ? "border-[#dc765a]" : "border-[var(--color-border)]"}`} id={id} inputMode={inputMode} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} type={type} value={value} />
       {error ? <FieldMessage error id={`${id}-error`}>{error}</FieldMessage> : help ? <FieldMessage id={`${id}-help`}>{help}</FieldMessage> : null}
+    </div>
+  );
+}
+
+type PhoneFieldProps = {
+  error?: string;
+  id: string;
+  onChange: (value: string) => void;
+  value: string;
+};
+
+function PhoneField({ error, id, onChange, value }: PhoneFieldProps) {
+  const nationalNumber = value.startsWith("+91") ? value.slice(3) : value;
+  const descriptionId = error ? `${id}-error` : undefined;
+
+  function updateNationalNumber(nextValue: string) {
+    const digits = nextValue.replace(/\D/g, "").slice(0, 13);
+    onChange(`+91${digits}`);
+  }
+
+  return (
+    <div>
+      <label className="text-sm font-extrabold text-[var(--color-ink)]" htmlFor={id}>Phone number</label>
+      <div className={`mt-2.5 flex h-13 w-full overflow-hidden rounded-xl border bg-[#f8faf9] transition focus-within:border-[var(--color-brand)] focus-within:ring-4 focus-within:ring-[var(--color-brand)]/10 ${error ? "border-[#dc765a]" : "border-[var(--color-border)]"}`}>
+        <span aria-hidden="true" className="flex shrink-0 items-center border-r border-[var(--color-border)] bg-slate-100 px-4 text-sm font-extrabold text-[var(--color-ink)]">
+          +91
+        </span>
+        <input
+          aria-describedby={descriptionId}
+          aria-invalid={Boolean(error)}
+          autoComplete="tel-national"
+          className="min-w-0 flex-1 bg-transparent px-4 text-sm font-bold text-[var(--color-ink)] outline-none placeholder:text-slate-400"
+          id={id}
+          inputMode="numeric"
+          onChange={(event) => updateNationalNumber(event.target.value)}
+          placeholder="98765 43210"
+          type="tel"
+          value={nationalNumber}
+        />
+      </div>
+      {error && <FieldMessage error id={`${id}-error`}>{error}</FieldMessage>}
     </div>
   );
 }
